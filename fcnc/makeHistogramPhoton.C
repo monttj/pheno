@@ -6,12 +6,14 @@ root -l examples/Example1.C\(\"delphes_output.root\"\)
 
 void makeHistogramPhoton(const char *inputFile, const TString & processName)
 {
-  gSystem->Load("libDelphes");
+  //gSystem->Load("libDelphes");
+  gSystem->Load("libDelphesMA5tune");
 
   TFile* f = TFile::Open(Form("hist_%s.root", processName.Data()), "recreate");
 
   // Create chain of root trees
-  TChain chain("Delphes");
+  //TChain chain("Delphes");
+  TChain chain("DelphesMA5tune");
   chain.Add(inputFile);
   
   // Create object of class ExRootTreeReader
