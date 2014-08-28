@@ -55,6 +55,8 @@ void PlotPhoton(const TString & file = "hist_h2aa"){
   TH1 * h_eta = (TH1F*) f->Get("photon_eta");
   TH1 * h_pt_1 = (TH1F*) f->Get("photon1_pt");
   TH1 * h_pt_2 = (TH1F*) f->Get("photon2_pt");
+  TH1 * h_pfIso03_1 = (TH1F*) f->Get("photon1_pfIso03");
+  TH1 * h_pfIso03_2 = (TH1F*) f->Get("photon2_pfIso03");
   TH1 * h_mass = (TH1F*) f->Get("diphoton_mass");
   TH1 * h_nPhoton = (TH1F*) f->Get("nPhoton");
   TH1 * h_nEle = (TH1F*) f->Get("nElectron");
@@ -82,6 +84,8 @@ void PlotPhoton(const TString & file = "hist_h2aa"){
   TH1 * h2_eta = (TH1F*) f2->Get("photon_eta");
   TH1 * h2_pt_1 = (TH1F*) f2->Get("photon1_pt");
   TH1 * h2_pt_2 = (TH1F*) f2->Get("photon2_pt");
+  TH1 * h2_pfIso03_1 = (TH1F*) f2->Get("photon1_pfIso03");
+  TH1 * h2_pfIso03_2 = (TH1F*) f2->Get("photon2_pfIso03");
   TH1 * h2_mass = (TH1F*) f2->Get("diphoton_mass");
   TH1 * h2_nPhoton = (TH1F*) f2->Get("nPhoton");
   TH1 * h2_nEle = (TH1F*) f2->Get("nElectron");
@@ -97,6 +101,8 @@ void PlotPhoton(const TString & file = "hist_h2aa"){
   TH1 * h3_eta = (TH1F*) f3->Get("photon_eta");
   TH1 * h3_pt_1 = (TH1F*) f3->Get("photon1_pt");
   TH1 * h3_pt_2 = (TH1F*) f3->Get("photon2_pt");
+  TH1 * h3_pfIso03_1 = (TH1F*) f3->Get("photon1_pfIso03");
+  TH1 * h3_pfIso03_2 = (TH1F*) f3->Get("photon2_pfIso03");
   TH1 * h3_mass = (TH1F*) f3->Get("diphoton_mass");
   TH1 * h3_nPhoton = (TH1F*) f3->Get("nPhoton");
   TH1 * h3_nEle = (TH1F*) f3->Get("nElectron");
@@ -108,6 +114,8 @@ void PlotPhoton(const TString & file = "hist_h2aa"){
   compare(h_eta,     h2_eta,     h1_name, h2_name, "Photon #eta",           "photon_eta_h2aa", 0.1) ; 
   compare(h_pt_1,    h2_pt_1,    h1_name, h2_name, "Leading Photon P_{T} (GeV)",    "photon1_pt_h2aa", 0.22) ;
   compare(h_pt_2,    h2_pt_2,    h1_name, h2_name, "Second Leading Photon P_{T} (GeV)",    "photon2_pt_h2aa", 0.22) ;
+  compare(h_pfIso03_1,    h2_pfIso03_1,    h1_name, h2_name, "PFlow Isolation",    "photon1_pfIso_h2aa", 0.22) ;
+  compare(h_pfIso03_2,    h2_pfIso03_2,    h1_name, h2_name, "PFlow Isolation",    "photon2_pfIso_h2aa", 0.22) ;
   compare(h_mass,    h2_mass,    h1_name, h2_name, "Diphoton mass (GeV)",   "diphoton_mass_h2aa", 0.11) ; 
   compare(h_nPhoton, h2_nPhoton, h1_name, h2_name, "Photon Multiplicity",   "photon_multiplicity_h2aa", 1.0) ; 
   compare(h_nEle,    h2_nEle,    h1_name, h2_name, "Electron Multiplicity", "electron_multiplicity_h2aa", 1.0) ; 
@@ -118,6 +126,7 @@ void PlotPhoton(const TString & file = "hist_h2aa"){
   compare(h3_pt,      h2_pt,      h3_name, h2_name, "Photon P_{T} (GeV)",    "photon_pt_ttbar", 0.18) ;
   compare(h3_eta,     h2_eta,     h3_name, h2_name, "Photon #eta",           "photon_eta_ttbar", 0.1) ;
   compare(h3_pt_1,    h2_pt_1,    h3_name, h2_name, "Leading Photon P_{T} (GeV)",    "photon1_pt_ttbar", 0.22) ;
+  compare(h3_pfIso03_1,    h2_pfIso03_1,    h3_name, h2_name, "PFlow Isolation",    "photon1_pfIso_ttbar", 0.22) ;
   //compare(h3_pt_2,    h2_pt_2,    h3_name, h2_name, "Second Leading Photon P_{T} (GeV)",    "photon2_pt_ttbar", 0.22) ;
   //compare(h3_mass,    h2_mass,    h3_name, h2_name, "Diphoton mass (GeV)",   "diphoton_mass_ttbar", 0.22) ;
   compare(h3_nPhoton, h2_nPhoton, h3_name, h2_name, "Photon Multiplicity",   "photon_multiplicity_ttbar", 1.0) ;

@@ -51,6 +51,8 @@ void makeHistogramPhoton(const char *inputFile, const TString & processName)
   TH1 *histPhoton2PT = new TH1F("photon2_pt", "photon P_{T}", 40, 0, 200);
   TH1 *histPhoton1Eta = new TH1F("photon1_eta", "photon Eta", 60, -3, 3);
   TH1 *histPhoton2Eta = new TH1F("photon2_eta", "photon Eta", 60, -3, 3);
+  TH1 *histPhoton1Iso03eflow = new TH1F("photon1_pfIso03", "PF Iso 03", 40, 0, 4);
+  TH1 *histPhoton2Iso03eflow = new TH1F("photon2_pfIso03", "PF Iso 03", 40, 0, 4);
   TH1 *histDiPhotonMass = new TH1F("diphoton_mass","Di-Photon Invariant Mass (GeV)",80, 105,145);
  
   // Loop over all events
@@ -133,6 +135,9 @@ void makeHistogramPhoton(const char *inputFile, const TString & processName)
       histPhoton2PT->Fill(pho2->PT);
       histPhoton2Eta->Fill(pho2->Eta);
 
+      histPhoton1Iso03eflow->Fill(pho1->sumPTeflow03);
+      histPhoton2Iso03eflow->Fill(pho2->sumPTeflow03);
+
       histDiPhotonMass->Fill(((pho1->P4()) + (pho2->P4())).M());
     }
     // lepton multiplicity
@@ -165,6 +170,8 @@ void makeHistogramPhoton(const char *inputFile, const TString & processName)
   histPhoton2PT->Write();
   histPhoton1Eta->Write();
   histPhoton2Eta->Write();
+  histPhoton1Iso03eflow->Write();
+  histPhoton2Iso03eflow->Write();
   histnPhoton->Write();
   histDiPhotonMass->Write();
 
