@@ -22,9 +22,9 @@ void makeHistogramPhoton(const char *inputFile, const TString & processName)
   
   // Get pointers to branches used in this analysis
   TClonesArray *branchJet = treeReader->UseBranch("Jet");
-  TClonesArray *branchElectron = treeReader->UseBranch("Electron");
-  TClonesArray *branchMuon = treeReader->UseBranch("Muon");
-  TClonesArray *branchPhoton = treeReader->UseBranch("Photon");
+  TClonesArray *branchElectron = treeReader->UseBranch("DelphesMA5tuneElectron");
+  TClonesArray *branchMuon = treeReader->UseBranch("DelphesMA5tuneMuon");
+  TClonesArray *branchPhoton = treeReader->UseBranch("DelphesMA5tunePhoton");
   
   // Book histograms
   TH1 *nEvents = new TH1F("nEvents", "nEvents", 2, 0, 2);
@@ -51,9 +51,15 @@ void makeHistogramPhoton(const char *inputFile, const TString & processName)
   TH1 *histPhoton2PT = new TH1F("photon2_pt", "photon P_{T}", 40, 0, 200);
   TH1 *histPhoton1Eta = new TH1F("photon1_eta", "photon Eta", 60, -3, 3);
   TH1 *histPhoton2Eta = new TH1F("photon2_eta", "photon Eta", 60, -3, 3);
-  TH1 *histPhoton1Iso03eflow = new TH1F("photon1_pfIso03", "PF Iso 03", 40, 0, 4);
-  TH1 *histPhoton2Iso03eflow = new TH1F("photon2_pfIso03", "PF Iso 03", 40, 0, 4);
+  TH1 *histPhoton1Iso03eflow = new TH1F("photon1_pfIso03", "PF Iso 03", 400, 0, 4);
+  TH1 *histPhoton2Iso03eflow = new TH1F("photon2_pfIso03", "PF Iso 03", 400, 0, 4);
+  TH1 *histPhoton1Iso03det_PT = new TH1F("photon1_detIso03_PT", "Det Iso 03 (PT sum)", 400, 0, 4);
+  TH1 *histPhoton2Iso03det_PT = new TH1F("photon2_detIso03_PT", "Det Iso 03 (PT sum)", 400, 0, 4);
+  TH1 *histPhoton1Iso03det_ET = new TH1F("photon1_detIso03_ET", "Det Iso 03 (ET sum)", 400, 0, 4);
+  TH1 *histPhoton2Iso03det_ET = new TH1F("photon2_detIso03_ET", "Det Iso 03 (ET sum)", 400, 0, 4);
   TH1 *histDiPhotonMass = new TH1F("diphoton_mass","Di-Photon Invariant Mass (GeV)",80, 105,145);
+  TH1 *histDiPhotonMassAfterPFIso = new TH1F("diphoton_mass_afterPFIso","Di-Photon Invariant Mass (GeV)",80, 105,145);
+  TH1 *histDiPhotonMassAfterDetIso = new TH1F("diphoton_mass_afterDetIso","Di-Photon Invariant Mass (GeV)",80, 105,145);
  
   // Loop over all events
   nEvents->SetBinContent(1, numberOfEntries);
@@ -138,7 +144,22 @@ void makeHistogramPhoton(const char *inputFile, const TString & processName)
       histPhoton1Iso03eflow->Fill(pho1->sumPTeflow03);
       histPhoton2Iso03eflow->Fill(pho2->sumPTeflow03);
 
+      histPhoton1Iso03det_PT->Fill(pho1->sumPT03);
+      histPhoton2Iso03det_PT->Fill(pho2->sumPT03);
+
+      histPhoton1Iso03det_ET->Fill(pho1->sumET03);
+      histPhoton2Iso03det_ET->Fill(pho2->sumET03);
+
       histDiPhotonMass->Fill(((pho1->P4()) + (pho2->P4())).M());
+
+      if( pho1->sumPT03 < 0.5 && pho2->sumPT03 < 0.5 ){
+        histDiPhotonMassAfterDetIso->Fill(((pho1->P4()) + (pho2->P4())).M());
+      }
+
+      if( pho1->sumPTeflow03 < 0.5 && pho2->sumPTeflow03 < 0.5 ){
+        histDiPhotonMassAfterPFIso->Fill(((pho1->P4()) + (pho2->P4())).M());
+      }
+
     }
     // lepton multiplicity
     histnElectron->Fill( branchElectron->GetEntries() );
@@ -172,8 +193,14 @@ void makeHistogramPhoton(const char *inputFile, const TString & processName)
   histPhoton2Eta->Write();
   histPhoton1Iso03eflow->Write();
   histPhoton2Iso03eflow->Write();
+  histPhoton1Iso03det_PT->Write();
+  histPhoton2Iso03det_PT->Write();
+  histPhoton1Iso03det_ET->Write();
+  histPhoton2Iso03det_ET->Write();
   histnPhoton->Write();
   histDiPhotonMass->Write();
+  histDiPhotonMassAfterDetIso->Write();
+  histDiPhotonMassAfterPFIso->Write();
 
   f->Close();
 

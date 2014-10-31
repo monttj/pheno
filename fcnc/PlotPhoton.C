@@ -46,23 +46,27 @@ void compare(TH1 *h1, TH1 *h2, const TString & h1_name, const TString & h2_name,
 
 } 
 
-void PlotPhoton(const TString & file = "hist_h2aa"){
+void PlotPhoton( const TString & file1 = "", const TString name1 = "", const TString & file2 = "", const TString & name2 = ""){
 
-  TFile * f = new TFile(Form("%s.root",file.Data()));
-  TString h1_name = "h#rightarrow#gamma#gamma";
 
-  TH1 * h_pt = (TH1F*) f->Get("photon_pt");
-  TH1 * h_eta = (TH1F*) f->Get("photon_eta");
-  TH1 * h_pt_1 = (TH1F*) f->Get("photon1_pt");
-  TH1 * h_pt_2 = (TH1F*) f->Get("photon2_pt");
-  TH1 * h_pfIso03_1 = (TH1F*) f->Get("photon1_pfIso03");
-  TH1 * h_pfIso03_2 = (TH1F*) f->Get("photon2_pfIso03");
-  TH1 * h_mass = (TH1F*) f->Get("diphoton_mass");
-  TH1 * h_nPhoton = (TH1F*) f->Get("nPhoton");
-  TH1 * h_nEle = (TH1F*) f->Get("nElectron");
-  TH1 * h_nMuo = (TH1F*) f->Get("nMuon");
-  TH1 * h_nJet = (TH1F*) f->Get("nJet");
-  TH1 * h_nbJet = (TH1F*) f->Get("nbJet");
+  TFile * f1 = new TFile(Form("%s",file1.Data()));
+  TString h1_name = name1;
+
+  TFile * f2 = new TFile(Form("%s",file2.Data()));  
+  TString h2_name = name2;
+
+  TH1 * h_pt = (TH1F*) f1->Get("photon_pt");
+  TH1 * h_eta = (TH1F*) f1->Get("photon_eta");
+  TH1 * h_pt_1 = (TH1F*) f1->Get("photon1_pt");
+  TH1 * h_pt_2 = (TH1F*) f1->Get("photon2_pt");
+  TH1 * h_pfIso03_1 = (TH1F*) f1->Get("photon1_pfIso03");
+  TH1 * h_pfIso03_2 = (TH1F*) f1->Get("photon2_pfIso03");
+  TH1 * h_mass = (TH1F*) f1->Get("diphoton_mass");
+  TH1 * h_nPhoton = (TH1F*) f1->Get("nPhoton");
+  TH1 * h_nEle = (TH1F*) f1->Get("nElectron");
+  TH1 * h_nMuo = (TH1F*) f1->Get("nMuon");
+  TH1 * h_nJet = (TH1F*) f1->Get("nJet");
+  TH1 * h_nbJet = (TH1F*) f1->Get("nbJet");
 
 /*
   plot( h_pt, "Photon P_{T} (GeV)", "pt");
@@ -76,9 +80,6 @@ void PlotPhoton(const TString & file = "hist_h2aa"){
   plot( h_nEle, "Electron Multiplicity", "nele");
   plot( h_nMuo, "Muon Multiplicity","nele"); 
 */
-
-  TFile * f2 = new TFile("hist_tch2aa.root");
-  TString h2_name = "tch, h#rightarrow#gamma#gamma";
 
   TH1 * h2_pt = (TH1F*) f2->Get("photon_pt");
   TH1 * h2_eta = (TH1F*) f2->Get("photon_eta");
@@ -94,46 +95,46 @@ void PlotPhoton(const TString & file = "hist_h2aa"){
   TH1 * h2_nbJet = (TH1F*) f2->Get("nbJet");
 
 
-  TFile * f3 = new TFile("hist_ttbarLO.root");
-  TString h3_name = "ttbar";
+//  TFile * f3 = new TFile("hist_ttbarLO.root");
+//  TString h3_name = "ttbar";
 
-  TH1 * h3_pt = (TH1F*) f3->Get("photon_pt");
-  TH1 * h3_eta = (TH1F*) f3->Get("photon_eta");
-  TH1 * h3_pt_1 = (TH1F*) f3->Get("photon1_pt");
-  TH1 * h3_pt_2 = (TH1F*) f3->Get("photon2_pt");
-  TH1 * h3_pfIso03_1 = (TH1F*) f3->Get("photon1_pfIso03");
-  TH1 * h3_pfIso03_2 = (TH1F*) f3->Get("photon2_pfIso03");
-  TH1 * h3_mass = (TH1F*) f3->Get("diphoton_mass");
-  TH1 * h3_nPhoton = (TH1F*) f3->Get("nPhoton");
-  TH1 * h3_nEle = (TH1F*) f3->Get("nElectron");
-  TH1 * h3_nMuo = (TH1F*) f3->Get("nMuon");
-  TH1 * h3_nJet = (TH1F*) f3->Get("nJet");
-  TH1 * h3_nbJet = (TH1F*) f3->Get("nbJet");
+//  TH1 * h3_pt = (TH1F*) f3->Get("photon_pt");
+//  TH1 * h3_eta = (TH1F*) f3->Get("photon_eta");
+//  TH1 * h3_pt_1 = (TH1F*) f3->Get("photon1_pt");
+//  TH1 * h3_pt_2 = (TH1F*) f3->Get("photon2_pt");
+//  TH1 * h3_pfIso03_1 = (TH1F*) f3->Get("photon1_pfIso03");
+//  TH1 * h3_pfIso03_2 = (TH1F*) f3->Get("photon2_pfIso03");
+//  TH1 * h3_mass = (TH1F*) f3->Get("diphoton_mass");
+//  TH1 * h3_nPhoton = (TH1F*) f3->Get("nPhoton");
+//  TH1 * h3_nEle = (TH1F*) f3->Get("nElectron");
+//  TH1 * h3_nMuo = (TH1F*) f3->Get("nMuon");
+//  TH1 * h3_nJet = (TH1F*) f3->Get("nJet");
+//  TH1 * h3_nbJet = (TH1F*) f3->Get("nbJet");
 
-  compare(h_pt,      h2_pt,      h1_name, h2_name, "Photon P_{T} (GeV)",    "photon_pt_h2aa", 0.18) ; 
-  compare(h_eta,     h2_eta,     h1_name, h2_name, "Photon #eta",           "photon_eta_h2aa", 0.1) ; 
-  compare(h_pt_1,    h2_pt_1,    h1_name, h2_name, "Leading Photon P_{T} (GeV)",    "photon1_pt_h2aa", 0.22) ;
-  compare(h_pt_2,    h2_pt_2,    h1_name, h2_name, "Second Leading Photon P_{T} (GeV)",    "photon2_pt_h2aa", 0.22) ;
-  compare(h_pfIso03_1,    h2_pfIso03_1,    h1_name, h2_name, "PFlow Isolation",    "photon1_pfIso_h2aa", 0.22) ;
-  compare(h_pfIso03_2,    h2_pfIso03_2,    h1_name, h2_name, "PFlow Isolation",    "photon2_pfIso_h2aa", 0.22) ;
-  compare(h_mass,    h2_mass,    h1_name, h2_name, "Diphoton mass (GeV)",   "diphoton_mass_h2aa", 0.11) ; 
-  compare(h_nPhoton, h2_nPhoton, h1_name, h2_name, "Photon Multiplicity",   "photon_multiplicity_h2aa", 1.0) ; 
-  compare(h_nEle,    h2_nEle,    h1_name, h2_name, "Electron Multiplicity", "electron_multiplicity_h2aa", 1.0) ; 
-  compare(h_nMuo,    h2_nMuo,    h1_name, h2_name, "Muon Multiplicity",     "muon_multiplicity_h2aa", 1.0) ; 
-  compare(h_nJet,    h2_nJet,    h1_name, h2_name, "Jet Multiplicity",      "jet_multiplicity_h2aa", 0.5) ; 
-  compare(h_nbJet,   h2_nbJet,   h1_name, h2_name, "b Jet Multiplicity",    "b_jet_multiplicity_h2aa", 1.0) ; 
+  compare(h_pt,      h2_pt,      h1_name, h2_name, "Photon P_{T} (GeV)",    "photon_pt", 0.18) ; 
+  compare(h_eta,     h2_eta,     h1_name, h2_name, "Photon #eta",           "photon_eta", 0.1) ; 
+  compare(h_pt_1,    h2_pt_1,    h1_name, h2_name, "Leading Photon P_{T} (GeV)",    "photon1_pt", 0.22) ;
+  compare(h_pt_2,    h2_pt_2,    h1_name, h2_name, "Second Leading Photon P_{T} (GeV)",    "photon2_pt", 0.22) ;
+  compare(h_pfIso03_1,    h2_pfIso03_1,    h1_name, h2_name, "PFlow Isolation",    "photon1_pfIso", 0.22) ;
+  compare(h_pfIso03_2,    h2_pfIso03_2,    h1_name, h2_name, "PFlow Isolation",    "photon2_pfIso", 0.22) ;
+  compare(h_mass,    h2_mass,    h1_name, h2_name, "Diphoton mass (GeV)",   "diphoton_mass", 0.11) ; 
+  compare(h_nPhoton, h2_nPhoton, h1_name, h2_name, "Photon Multiplicity",   "photon_multiplicity", 1.0) ; 
+  compare(h_nEle,    h2_nEle,    h1_name, h2_name, "Electron Multiplicity", "electron_multiplicity", 1.0) ; 
+  compare(h_nMuo,    h2_nMuo,    h1_name, h2_name, "Muon Multiplicity",     "muon_multiplicity", 1.0) ; 
+  compare(h_nJet,    h2_nJet,    h1_name, h2_name, "Jet Multiplicity",      "jet_multiplicity", 0.5) ; 
+  compare(h_nbJet,   h2_nbJet,   h1_name, h2_name, "b Jet Multiplicity",    "b_jet_multiplicity", 1.0) ; 
  
-  compare(h3_pt,      h2_pt,      h3_name, h2_name, "Photon P_{T} (GeV)",    "photon_pt_ttbar", 0.18) ;
-  compare(h3_eta,     h2_eta,     h3_name, h2_name, "Photon #eta",           "photon_eta_ttbar", 0.1) ;
-  compare(h3_pt_1,    h2_pt_1,    h3_name, h2_name, "Leading Photon P_{T} (GeV)",    "photon1_pt_ttbar", 0.22) ;
-  compare(h3_pfIso03_1,    h2_pfIso03_1,    h3_name, h2_name, "PFlow Isolation",    "photon1_pfIso_ttbar", 0.22) ;
+//  compare(h3_pt,      h2_pt,      h3_name, h2_name, "Photon P_{T} (GeV)",    "photon_pt_ttbar", 0.18) ;
+//  compare(h3_eta,     h2_eta,     h3_name, h2_name, "Photon #eta",           "photon_eta_ttbar", 0.1) ;
+//  compare(h3_pt_1,    h2_pt_1,    h3_name, h2_name, "Leading Photon P_{T} (GeV)",    "photon1_pt_ttbar", 0.22) ;
+//  compare(h3_pfIso03_1,    h2_pfIso03_1,    h3_name, h2_name, "PFlow Isolation",    "photon1_pfIso_ttbar", 0.22) ;
   //compare(h3_pt_2,    h2_pt_2,    h3_name, h2_name, "Second Leading Photon P_{T} (GeV)",    "photon2_pt_ttbar", 0.22) ;
   //compare(h3_mass,    h2_mass,    h3_name, h2_name, "Diphoton mass (GeV)",   "diphoton_mass_ttbar", 0.22) ;
-  compare(h3_nPhoton, h2_nPhoton, h3_name, h2_name, "Photon Multiplicity",   "photon_multiplicity_ttbar", 1.0) ;
-  compare(h3_nEle,    h2_nEle,    h3_name, h2_name, "Electron Multiplicity", "electron_multiplicity_ttbar", 1.0) ;
-  compare(h3_nMuo,    h2_nMuo,    h3_name, h2_name, "Muon Multiplicity",     "muon_multiplicity_ttbar", 1.0) ;
-  compare(h3_nJet,    h2_nJet,    h3_name, h2_name, "Jet Multiplicity",      "jet_multiplicity_ttbar", 0.5) ;
-  compare(h3_nbJet,   h2_nbJet,   h3_name, h2_name, "b Jet Multiplicity",    "b_jet_multiplicity_ttbar", 1.0) ;
+//  compare(h3_nPhoton, h2_nPhoton, h3_name, h2_name, "Photon Multiplicity",   "photon_multiplicity_ttbar", 1.0) ;
+//  compare(h3_nEle,    h2_nEle,    h3_name, h2_name, "Electron Multiplicity", "electron_multiplicity_ttbar", 1.0) ;
+//  compare(h3_nMuo,    h2_nMuo,    h3_name, h2_name, "Muon Multiplicity",     "muon_multiplicity_ttbar", 1.0) ;
+//  compare(h3_nJet,    h2_nJet,    h3_name, h2_name, "Jet Multiplicity",      "jet_multiplicity_ttbar", 0.5) ;
+//  compare(h3_nbJet,   h2_nbJet,   h3_name, h2_name, "b Jet Multiplicity",    "b_jet_multiplicity_ttbar", 1.0) ;
 
 
  
