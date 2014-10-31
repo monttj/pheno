@@ -6,7 +6,6 @@ root -l examples/Example1.C\(\"delphes_output.root\"\)
 
 void analyzer()
 {
-  gSystem->Load("libDelphesMA5tune");
 
   TString processName = "ZJets";
 
@@ -14,8 +13,11 @@ void analyzer()
 
   // Create chain of root trees
   TChain chain("DelphesMA5tune");
-  chain.Add("/cms/home/tjkim/fcnc/sample/ZToLL50-0Jet_sm-no_masses/events_*.root");
-  
+  //kisti
+  //chain.Add("/cms/home/tjkim/fcnc/sample/ZToLL50-0Jet_sm-no_masses/events_*.root");
+  //hep
+  chain.Add("/Users/tjkim/Work/fcnc/samples/ZToLL50-0Jet_sm-no_masses/events_*.root");  
+
   // Create object of class ExRootTreeReader
   ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
   Long64_t numberOfEntries = treeReader->GetEntries();
