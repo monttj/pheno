@@ -45,6 +45,7 @@ class tcH : public AnalyzerBase
  TH1F *h_nleptons[7];
  TH1F *h_mtop[7];
  TH1F *h_drjetlep[7];
+ TH1F *h_drjetpho[7];
 
  //-----------------------------------------
  //-----------------------------------------

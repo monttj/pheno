@@ -50,6 +50,7 @@ bool tcH::Initialize(const MA5::Configuration& cfg, const std::map<std::string,s
     h_nleptons[i]       = new TH1F("nleptons", "nleptons", 5, 0, 5); 
     h_mtop[i]           = new TH1F("mtop","mtop",200, 130, 230);
     h_drjetlep[i]           = new TH1F("drjetlep","drjetlep", 200, 0, 2);
+    h_drjetpho[i]           = new TH1F("drjetpho","drjetpho", 200, 0, 2);
 
     output->cd();
   }
@@ -133,6 +134,10 @@ void tcH::Finalize(const SampleFormat& summary, const std::vector<SampleFormat>&
     h_nelectrons[i]->Scale(scale);
     h_nmuons[i]->Scale(scale);
     h_nleptons[i]->Scale(scale);
+    h_mtop[i]->Scale(scale);
+    h_drjetlep[i]->Scale(scale);
+    h_drjetpho[i]->Scale(scale);
+
   }
 
   output->Write();
@@ -183,13 +188,15 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
   
     std::vector< RecLeptonFormat > selElecsColl;
     std::vector< RecLeptonFormat > selMuonsColl;
-    
+    std::vector<const RecLeptonFormat*> selLeptonsColl;   
+ 
     for (unsigned int i=0;i<event.rec()->electrons().size();i++)
     {
       const RecLeptonFormat& elec = event.rec()->electrons()[i];
       double reliso = isolation(3, elec);
       if(elec.pt() > 20 && fabs(elec.eta()) < 2.5 && reliso < 0.1){
         selElecsColl.push_back(elec);
+        selLeptonsColl.push_back(&elec);
       }
     }
     
@@ -199,6 +206,7 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
       double reliso = isolation(3, mu);
       if(mu.pt() > 20 && fabs(mu.eta()) < 2.5 && reliso < 0.1){
         selMuonsColl.push_back(mu);
+        selLeptonsColl.push_back(&mu);
       }
     }
     
@@ -207,12 +215,27 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     //************* jet selection ************
     //****************************************
     
+    std::vector<const RecJetFormat*> cleanJetsColl = tool.JetCleaning(event, selLeptonsColl, 0.5, 30);  //Clean the jets which are associated to isolated electrons and muons
+
     std::vector< RecJetFormat > selJetsColl;
     std::vector< RecJetFormat > selBJetsColl;
     int nbjets=0;
-    for (unsigned int i=0;i<event.rec()->jets().size();i++)
+
+    for (unsigned int i=0; i < cleanJetsColl.size();i++)
     {
-      const RecJetFormat& jet = event.rec()->jets()[i];
+      const RecJetFormat& jet = *cleanJetsColl[i];
+      TLorentzVector tmpjet;
+      tmpjet.SetPtEtaPhiM( jet.pt(), jet.eta(), jet.phi(), 0 );
+
+      bool overlap = false;
+      for(unsigned int j = 0 ; j < isoPhotonsColl.size() ; j++){
+        TLorentzVector tmpisoph;
+        tmpisoph.SetPtEtaPhiM( isoPhotonsColl[j].pt(), isoPhotonsColl[j].eta(), isoPhotonsColl[j].phi(), 0);
+        double dr = tmpjet.DeltaR(tmpisoph); 
+        if( dr < 0.5 ) overlap = true;
+      } 
+      if( overlap ) continue;
+
       if(jet.pt()> 30 && fabs(jet.eta()) < 2.5 && jet.EEoverHE() > 0.3){
         selJetsColl.push_back(jet);
         bool btagged = tool.isCSVT(&jet);
@@ -268,7 +291,8 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
 
     double topmass = 0;
     double diff = 999;
-    double dr = 999;
+    double dr_lep = 999;
+    double dr_pho = 999;
     for (unsigned int i=0; i < selJetsColl.size() ;i++)
     {
       TLorentzVector tmpjet;
@@ -278,8 +302,17 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
       if ( tmpdiff < diff ) topmass = tmptopmass;
       double tmpdr1 = tmpjet.DeltaR(isoph1);
       double tmpdr2 = tmpjet.DeltaR(isoph2);
-      if( tmpdr1 > tmpdr2 ) { dr = tmpdr2; }
-      else { dr = tmpdr1; }
+      if( tmpdr1 > tmpdr2 ) { dr_pho = tmpdr2; }
+      else { dr_pho = tmpdr1; }
+      
+      for (unsigned int i=0; i < selLeptonsColl.size();i++)
+      {
+        const RecLeptonFormat& l = *selLeptonsColl[i];
+        TLorentzVector tmpl;
+        tmpl.SetPtEtaPhiM( l.pt(), l.eta(), l.phi(), 0 );
+        double tmpdr = tmpjet.DeltaR(tmpl);
+        if( tmpdr < dr_lep ) { dr_lep = tmpdr ; }
+      }
     }
 
     //Fill histograms at Step 1
@@ -296,7 +329,8 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     h_nelectrons[1]->Fill( selElecsColl.size() );
     h_MET[1]->Fill( event.rec()->MET().pt() );
     h_mtop[1]->Fill(topmass);
-    h_drjetlep[1]->Fill(dr);
+    h_drjetlep[1]->Fill(dr_lep);
+    h_drjetpho[1]->Fill(dr_pho);
 
     //at least 2 jets
     if(selJetsColl.size() < 2)  return true;
@@ -316,7 +350,8 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     h_nelectrons[2]->Fill( selElecsColl.size() );
     h_MET[2]->Fill( event.rec()->MET().pt() );
     h_mtop[2]->Fill(topmass);
-    h_drjetlep[2]->Fill(dr);
+    h_drjetlep[2]->Fill(dr_lep);
+    h_drjetpho[2]->Fill(dr_pho);
 
 
     //at least 2 bjets
@@ -337,7 +372,8 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     h_nelectrons[3]->Fill( selElecsColl.size() );
     h_MET[3]->Fill( event.rec()->MET().pt() );
     h_mtop[3]->Fill(topmass);
-    h_drjetlep[3]->Fill(dr);
+    h_drjetlep[3]->Fill(dr_lep);
+    h_drjetpho[3]->Fill(dr_pho);
 
 
     //met > 20 GeV
@@ -360,7 +396,8 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     h_nelectrons[4]->Fill( selElecsColl.size() );
     h_MET[4]->Fill( event.rec()->MET().pt() ); 
     h_mtop[4]->Fill(topmass);
-    h_drjetlep[4]->Fill(dr);
+    h_drjetlep[4]->Fill(dr_lep);
+    h_drjetpho[4]->Fill(dr_pho);
  
     if( (selElecsColl.size() + selMuonsColl.size()) < 1 ) {
       cutFlow->Fill(5.);
@@ -378,7 +415,8 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
       h_nelectrons[5]->Fill( selElecsColl.size() );
       h_MET[5]->Fill( event.rec()->MET().pt() );
       h_mtop[5]->Fill(topmass);
-      h_drjetlep[5]->Fill(dr);
+      h_drjetlep[5]->Fill(dr_lep);
+      h_drjetpho[5]->Fill(dr_pho);
 
     }else{
       cutFlow->Fill(6.);
@@ -396,7 +434,8 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
       h_nelectrons[6]->Fill( selElecsColl.size() );
       h_MET[6]->Fill( event.rec()->MET().pt() );
       h_mtop[6]->Fill(topmass);
-      h_drjetlep[6]->Fill(dr);
+      h_drjetlep[6]->Fill(dr_lep);
+      h_drjetpho[6]->Fill(dr_pho);
     }
      
   }
