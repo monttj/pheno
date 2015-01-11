@@ -225,7 +225,7 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     {
       const RecJetFormat& jet = *cleanJetsColl[i];
       TLorentzVector tmpjet;
-      tmpjet.SetPtEtaPhiM( jet.pt(), jet.eta(), jet.phi(), 0 );
+      tmpjet.SetPtEtaPhiM( jet.pt(), jet.eta(), jet.phi(), jet.m() );
 
       bool overlap = false;
       for(unsigned int j = 0 ; j < isoPhotonsColl.size() ; j++){
@@ -296,7 +296,7 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     for (unsigned int i=0; i < selJetsColl.size() ;i++)
     {
       TLorentzVector tmpjet;
-      tmpjet.SetPtEtaPhiM( selJetsColl[i].pt(), selJetsColl[i].eta(), selJetsColl[i].phi(), 0 ); 
+      tmpjet.SetPtEtaPhiM( selJetsColl[i].pt(), selJetsColl[i].eta(), selJetsColl[i].phi(), selJetsColl[i].m() ); 
       double tmptopmass = (isoph1+isoph2+tmpjet).M();
       double tmpdiff = abs(topmass-173.3);
       if ( tmpdiff < diff ) topmass = tmptopmass;
