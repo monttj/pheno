@@ -30,22 +30,23 @@ class tcH : public AnalyzerBase
  //-----------------------------------------
  
  TH1F *cutFlow;
+ TH1F *cutFlow2;
 
- TH1F *h_photon1pt[7];
- TH1F *h_photon2pt[7];
- TH1F *h_photon1iso[7];
- TH1F *h_photon2iso[7];
- TH1F *h_diphotonM[7];
- TH1F *h_MET[7];
- TH1F *h_nbjets[7];
- TH1F *h_njets[7];
- TH1F *h_nphotons[7];
- TH1F *h_nelectrons[7];
- TH1F *h_nmuons[7];
- TH1F *h_nleptons[7];
- TH1F *h_mtop[7];
- TH1F *h_drjetlep[7];
- TH1F *h_drjetpho[7];
+ TH1F *h_photon1pt[10];
+ TH1F *h_photon2pt[10];
+ TH1F *h_photon1iso[10];
+ TH1F *h_photon2iso[10];
+ TH1F *h_diphotonM[10];
+ TH1F *h_MET[10];
+ TH1F *h_nbjets[10];
+ TH1F *h_njets[10];
+ TH1F *h_nphotons[10];
+ TH1F *h_nelectrons[10];
+ TH1F *h_nmuons[10];
+ TH1F *h_nleptons[10];
+ TH1F *h_mtop[10];
+ TH1F *h_drjetlep[10];
+ TH1F *h_drjetpho[10];
 
  //-----------------------------------------
  //-----------------------------------------

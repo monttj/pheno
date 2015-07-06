@@ -30,10 +30,19 @@ bool tcH::Initialize(const MA5::Configuration& cfg, const std::map<std::string,s
   //----------------------------------------------------
   //histograms used for cutflow 
   cutFlow         = new TH1F("cutFlow", "cutFlow", 11, -0.5, 10.5);
+  cutFlow2         = new TH1F("cutFlow2", "cutFlow2", 11, -0.5, 10.5);
 
-  for(int i = 0; i < 7 ; i++){
+  for(int i = 0; i < 10 ; i++){
 
-    TDirectory * dir = output->mkdir(Form("S%i",i));
+    int k = i ;
+    TString channel = "";
+    if( i < 6 && i > 1 ) channel = "Leptonic";
+    else if( i > 5 ) {
+      channel = "Hadronic";
+      k = i - 4; //just to make it readable by making it the same folder name as leptonic channel.
+    }
+
+    TDirectory * dir = output->mkdir(Form("%sS%i",channel.Data(),k));
     dir->cd();
 
     h_photon1pt[i]       = new TH1F("photon1pt", "photon1pt", 100, 0, 100);
@@ -48,7 +57,7 @@ bool tcH::Initialize(const MA5::Configuration& cfg, const std::map<std::string,s
     h_nelectrons[i]       = new TH1F("nelectrons", "nelectrons", 5, 0, 5); 
     h_nmuons[i]       = new TH1F("nmuons", "nmuons", 5, 0, 5); 
     h_nleptons[i]       = new TH1F("nleptons", "nleptons", 5, 0, 5); 
-    h_mtop[i]           = new TH1F("mtop","mtop",200, 130, 230);
+    h_mtop[i]           = new TH1F("mtop","mtop",10, 130, 230);
     h_drjetlep[i]           = new TH1F("drjetlep","drjetlep", 200, 0, 2);
     h_drjetpho[i]           = new TH1F("drjetpho","drjetpho", 200, 0, 2);
 
@@ -56,6 +65,7 @@ bool tcH::Initialize(const MA5::Configuration& cfg, const std::map<std::string,s
   }
  
   cutFlow->Sumw2();
+  cutFlow2->Sumw2();
 
   //----------------------------------------------------
   //List here the sample names 
@@ -110,18 +120,27 @@ void tcH::Finalize(const SampleFormat& summary, const std::vector<SampleFormat>&
   // saving histos
   // saving histos
   float scale = weight/nevent;
+  std::cout << "xsec= " << xsec << std::endl;
   std::cout << "nevent= " << nevent << std::endl;
+  std::cout << "luminosity= " << luminosity << std::endl;
   std::cout << "scale= " << scale << std::endl; 
   cutFlow->Scale(scale); 
   cutFlow->GetXaxis()->SetBinLabel(1, "no sel");
   cutFlow->GetXaxis()->SetBinLabel(2, "2 photons");
-  cutFlow->GetXaxis()->SetBinLabel(3, ">= 2 jets");
-  cutFlow->GetXaxis()->SetBinLabel(4, ">= 1 btagged jets");
-  cutFlow->GetXaxis()->SetBinLabel(5, "= 1 btagged jet");
-  cutFlow->GetXaxis()->SetBinLabel(6, "hadronic");
-  cutFlow->GetXaxis()->SetBinLabel(7, "leptonic");
+  cutFlow->GetXaxis()->SetBinLabel(3, "1 lepton");
+  cutFlow->GetXaxis()->SetBinLabel(4, ">= 2 jets");
+  cutFlow->GetXaxis()->SetBinLabel(5, "== 1 btagged jets");
+  cutFlow->GetXaxis()->SetBinLabel(6, "mtop");
 
-  for(int i = 0 ; i < 7; i++){ 
+  cutFlow2->Scale(scale);
+  cutFlow2->GetXaxis()->SetBinLabel(1, "no sel");
+  cutFlow2->GetXaxis()->SetBinLabel(2, "2 photons");
+  cutFlow2->GetXaxis()->SetBinLabel(3, "no lepton");
+  cutFlow2->GetXaxis()->SetBinLabel(4, ">= 4 jets");
+  cutFlow2->GetXaxis()->SetBinLabel(5, "== 1 btagged jets");
+  cutFlow2->GetXaxis()->SetBinLabel(6, "mtop");
+
+  for(int i = 0 ; i < 10; i++){ 
     h_photon1pt[i]->Scale(scale);
     h_photon2pt[i]->Scale(scale);
     h_photon1iso[i]->Scale(scale);
@@ -137,7 +156,6 @@ void tcH::Finalize(const SampleFormat& summary, const std::vector<SampleFormat>&
     h_mtop[i]->Scale(scale);
     h_drjetlep[i]->Scale(scale);
     h_drjetpho[i]->Scale(scale);
-
   }
 
   output->Write();
@@ -163,7 +181,8 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
 
     nevent = nevent+1;
 
-    cutFlow->Fill(0., weight);
+    cutFlow->Fill(0.);
+    cutFlow2->Fill(0.);
   
     std::vector< RecPhotonFormat > selPhotonsColl;
     std::vector< RecPhotonFormat > isoPhotonsColl;
@@ -225,7 +244,7 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     {
       const RecJetFormat& jet = *cleanJetsColl[i];
       TLorentzVector tmpjet;
-      tmpjet.SetPtEtaPhiM( jet.pt(), jet.eta(), jet.phi(), jet.m() );
+      tmpjet.SetPtEtaPhiM( jet.pt(), jet.eta(), jet.phi(), 0 );
 
       bool overlap = false;
       for(unsigned int j = 0 ; j < isoPhotonsColl.size() ; j++){
@@ -236,7 +255,8 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
       } 
       if( overlap ) continue;
 
-      if(jet.pt()> 30 && fabs(jet.eta()) < 2.5 && jet.EEoverHE() > 0.3){
+      double eoverh = 1.0/0.15; 
+      if(jet.pt()> 30 && fabs(jet.eta()) < 2.5 && jet.EEoverHE() < eoverh ){
         selJetsColl.push_back(jet);
         bool btagged = tool.isCSVT(&jet);
         if( btagged ) nbjets++;
@@ -266,7 +286,7 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     //****************************************
     bool pre=false;
     if( isoPhotonsColl.size() > 1){
-      pre = isoPhotonsColl[0].pt() > 60 && isoPhotonsColl[0].pt() > 30;     
+      pre = isoPhotonsColl[0].pt() > 60 && isoPhotonsColl[1].pt() > 30;     
     }    
 
     //at least 2 photons
@@ -274,10 +294,11 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
 
  
     cutFlow->Fill(1.);
+    cutFlow2->Fill(1.);
     
     std::string thechannel = "";
-    if(     (selElecsColl.size() + selMuonsColl.size()) > 0 )    thechannel = "leptonic";
-    else                                                         thechannel = "hadronic";
+    if(     (selElecsColl.size() + selMuonsColl.size()) == 1 )    thechannel = "leptonic";
+    else if( (selElecsColl.size() + selMuonsColl.size()) == 0 )     thechannel = "hadronic";
 
 
     TLorentzVector ph1, ph2;
@@ -296,7 +317,7 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     for (unsigned int i=0; i < selJetsColl.size() ;i++)
     {
       TLorentzVector tmpjet;
-      tmpjet.SetPtEtaPhiM( selJetsColl[i].pt(), selJetsColl[i].eta(), selJetsColl[i].phi(), selJetsColl[i].m() ); 
+      tmpjet.SetPtEtaPhiM( selJetsColl[i].pt(), selJetsColl[i].eta(), selJetsColl[i].phi(), 0 ); 
       double tmptopmass = (isoph1+isoph2+tmpjet).M();
       double tmpdiff = abs(topmass-173.3);
       if ( tmpdiff < diff ) topmass = tmptopmass;
@@ -332,94 +353,96 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
     h_drjetlep[1]->Fill(dr_lep);
     h_drjetpho[1]->Fill(dr_pho);
 
-    //at least 2 jets
-    if(selJetsColl.size() < 2)  return true;
-    cutFlow->Fill(2.);
-   
-    //Fill histograms at Step 2 
-    h_photon1iso[2]->Fill( isolation(3, selPhotonsColl[0] ) );
-    h_photon2iso[2]->Fill( isolation(3, selPhotonsColl[1] ) );
-    h_photon1pt[2]->Fill( isoPhotonsColl[0].pt());
-    h_photon2pt[2]->Fill( isoPhotonsColl[1].pt());
-    h_diphotonM[2]->Fill( diphotonM );
-    h_nphotons[2]->Fill( isoPhotonsColl.size() );
-    h_njets[2]->Fill( selJetsColl.size() );
-    h_nbjets[2]->Fill( nbjets );
-    h_nleptons[2]->Fill( selElecsColl.size() + selMuonsColl.size() );
-    h_nmuons[2]->Fill( selMuonsColl.size() );
-    h_nelectrons[2]->Fill( selElecsColl.size() );
-    h_MET[2]->Fill( event.rec()->MET().pt() );
-    h_mtop[2]->Fill(topmass);
-    h_drjetlep[2]->Fill(dr_lep);
-    h_drjetpho[2]->Fill(dr_pho);
 
-
-    //at least 2 bjets
-    if(nbjets < 1 ) return true;
-    cutFlow->Fill(3.);
-    
-    //Fill histograms at Step 3 
-    h_photon1iso[3]->Fill( isolation(3, selPhotonsColl[0] ) );
-    h_photon2iso[3]->Fill( isolation(3, selPhotonsColl[1] ) );
-    h_photon1pt[3]->Fill( isoPhotonsColl[0].pt());
-    h_photon2pt[3]->Fill( isoPhotonsColl[1].pt());
-    h_diphotonM[3]->Fill( diphotonM );
-    h_nphotons[3]->Fill( isoPhotonsColl.size() );
-    h_njets[3]->Fill( selJetsColl.size() );
-    h_nbjets[3]->Fill( nbjets );
-    h_nleptons[3]->Fill( selElecsColl.size() + selMuonsColl.size() );
-    h_nmuons[3]->Fill( selMuonsColl.size() );
-    h_nelectrons[3]->Fill( selElecsColl.size() );
-    h_MET[3]->Fill( event.rec()->MET().pt() );
-    h_mtop[3]->Fill(topmass);
-    h_drjetlep[3]->Fill(dr_lep);
-    h_drjetpho[3]->Fill(dr_pho);
-
-
-    //met > 20 GeV
-    //if( event.rec()->MET().pt() < 20 ) return true;
-    // exactly 1 b-tag
-    if(nbjets > 1 ) return true;
-    cutFlow->Fill(4.);
-   
-    //Fill histograms at Step 4 
-    h_photon1iso[4]->Fill( isolation(3, selPhotonsColl[0] ) );
-    h_photon2iso[4]->Fill( isolation(3, selPhotonsColl[1] ) );
-    h_photon1pt[4]->Fill( isoPhotonsColl[0].pt());
-    h_photon2pt[4]->Fill( isoPhotonsColl[1].pt());
-    h_diphotonM[4]->Fill( diphotonM );
-    h_nphotons[4]->Fill( isoPhotonsColl.size() );
-    h_njets[4]->Fill( selJetsColl.size() );
-    h_nbjets[4]->Fill( nbjets );
-    h_nleptons[4]->Fill( selElecsColl.size() + selMuonsColl.size() );
-    h_nmuons[4]->Fill( selMuonsColl.size() );
-    h_nelectrons[4]->Fill( selElecsColl.size() );
-    h_MET[4]->Fill( event.rec()->MET().pt() ); 
-    h_mtop[4]->Fill(topmass);
-    h_drjetlep[4]->Fill(dr_lep);
-    h_drjetpho[4]->Fill(dr_pho);
+    if( thechannel == "leptonic" ) {
+      cutFlow->Fill(2.);
  
-    if( (selElecsColl.size() + selMuonsColl.size()) < 1 ) {
-      cutFlow->Fill(5.);
+      //Fill histograms at Step 2 
+      h_photon1iso[2]->Fill( isolation(3, selPhotonsColl[0] ) );
+      h_photon2iso[2]->Fill( isolation(3, selPhotonsColl[1] ) );
+      h_photon1pt[2]->Fill( isoPhotonsColl[0].pt());
+      h_photon2pt[2]->Fill( isoPhotonsColl[1].pt());
+      h_diphotonM[2]->Fill( diphotonM );
+      h_nphotons[2]->Fill( isoPhotonsColl.size() );
+      h_njets[2]->Fill( selJetsColl.size() );
+      h_nbjets[2]->Fill( nbjets );
+      h_nleptons[2]->Fill( selElecsColl.size() + selMuonsColl.size() );
+      h_nmuons[2]->Fill( selMuonsColl.size() );
+      h_nelectrons[2]->Fill( selElecsColl.size() );
+      h_MET[2]->Fill( event.rec()->MET().pt() );
+      h_mtop[2]->Fill(topmass);
+      h_drjetlep[2]->Fill(dr_lep);
+      h_drjetpho[2]->Fill(dr_pho);
 
-      h_photon1iso[5]->Fill( isolation(3, isoPhotonsColl[0] ) );
-      h_photon2iso[5]->Fill( isolation(3, isoPhotonsColl[1] ) );
+
+      if(selJetsColl.size() < 2)  return true;
+      cutFlow->Fill(3.);
+   
+      //Fill histograms at Step 2 
+      h_photon1iso[3]->Fill( isolation(3, selPhotonsColl[0] ) );
+      h_photon2iso[3]->Fill( isolation(3, selPhotonsColl[1] ) );
+      h_photon1pt[3]->Fill( isoPhotonsColl[0].pt());
+      h_photon2pt[3]->Fill( isoPhotonsColl[1].pt());
+      h_diphotonM[3]->Fill( diphotonM );
+      h_nphotons[3]->Fill( isoPhotonsColl.size() );
+      h_njets[3]->Fill( selJetsColl.size() );
+      h_nbjets[3]->Fill( nbjets );
+      h_nleptons[3]->Fill( selElecsColl.size() + selMuonsColl.size() );
+      h_nmuons[3]->Fill( selMuonsColl.size() );
+      h_nelectrons[3]->Fill( selElecsColl.size() );
+      h_MET[3]->Fill( event.rec()->MET().pt() );
+      h_mtop[3]->Fill(topmass);
+      h_drjetlep[3]->Fill(dr_lep);
+      h_drjetpho[3]->Fill(dr_pho);
+
+
+      //exactly one bjets
+      if(nbjets < 1 || nbjets > 1 ) return true;
+      //if(nbjets < 1 ) return true;
+      cutFlow->Fill(4.);
+    
+      //Fill histograms at Step 3 
+      h_photon1iso[4]->Fill( isolation(3, selPhotonsColl[0] ) );
+      h_photon2iso[4]->Fill( isolation(3, selPhotonsColl[1] ) );
+      h_photon1pt[4]->Fill( isoPhotonsColl[0].pt());
+      h_photon2pt[4]->Fill( isoPhotonsColl[1].pt());
+      h_diphotonM[4]->Fill( diphotonM );
+      h_nphotons[4]->Fill( isoPhotonsColl.size() );
+      h_njets[4]->Fill( selJetsColl.size() );
+      h_nbjets[4]->Fill( nbjets );
+      h_nleptons[4]->Fill( selElecsColl.size() + selMuonsColl.size() );
+      h_nmuons[4]->Fill( selMuonsColl.size() );
+      h_nelectrons[4]->Fill( selElecsColl.size() );
+      h_MET[4]->Fill( event.rec()->MET().pt() );
+      h_mtop[4]->Fill(topmass);
+      h_drjetlep[4]->Fill(dr_lep);
+      h_drjetpho[4]->Fill(dr_pho);
+
+      //met > 20 GeV
+      //if( event.rec()->MET().pt() < 20 ) return true;
+      // mtop
+      if( (topmass > 183.0) || (topmass < 163.0) ) return true;
+      cutFlow->Fill(5.);
+  
+      //Fill histograms at Step 4 
+      h_photon1iso[5]->Fill( isolation(3, selPhotonsColl[0] ) );
+      h_photon2iso[5]->Fill( isolation(3, selPhotonsColl[1] ) );
       h_photon1pt[5]->Fill( isoPhotonsColl[0].pt());
       h_photon2pt[5]->Fill( isoPhotonsColl[1].pt());
-      h_diphotonM[5]->Fill( (isoph1+isoph2).M() );
+      h_diphotonM[5]->Fill( diphotonM );
       h_nphotons[5]->Fill( isoPhotonsColl.size() );
       h_njets[5]->Fill( selJetsColl.size() );
       h_nbjets[5]->Fill( nbjets );
       h_nleptons[5]->Fill( selElecsColl.size() + selMuonsColl.size() );
       h_nmuons[5]->Fill( selMuonsColl.size() );
       h_nelectrons[5]->Fill( selElecsColl.size() );
-      h_MET[5]->Fill( event.rec()->MET().pt() );
+      h_MET[5]->Fill( event.rec()->MET().pt() ); 
       h_mtop[5]->Fill(topmass);
       h_drjetlep[5]->Fill(dr_lep);
       h_drjetpho[5]->Fill(dr_pho);
+    }else if( thechannel == "hadronic" ) {
 
-    }else{
-      cutFlow->Fill(6.);
+      cutFlow2->Fill(2.);
 
       h_photon1iso[6]->Fill( isolation(3, isoPhotonsColl[0] ) );
       h_photon2iso[6]->Fill( isolation(3, isoPhotonsColl[1] ) );
@@ -434,8 +457,64 @@ bool tcH::Execute(SampleFormat& sample, const EventFormat& event)
       h_nelectrons[6]->Fill( selElecsColl.size() );
       h_MET[6]->Fill( event.rec()->MET().pt() );
       h_mtop[6]->Fill(topmass);
-      h_drjetlep[6]->Fill(dr_lep);
       h_drjetpho[6]->Fill(dr_pho);
+
+      if(selJetsColl.size() < 3)  return true;
+      cutFlow2->Fill(3.);
+
+      h_photon1iso[7]->Fill( isolation(3, isoPhotonsColl[0] ) );
+      h_photon2iso[7]->Fill( isolation(3, isoPhotonsColl[1] ) );
+      h_photon1pt[7]->Fill( isoPhotonsColl[0].pt());
+      h_photon2pt[7]->Fill( isoPhotonsColl[1].pt());
+      h_diphotonM[7]->Fill( (isoph1+isoph2).M() );
+      h_nphotons[7]->Fill( isoPhotonsColl.size() );
+      h_njets[7]->Fill( selJetsColl.size() );
+      h_nbjets[7]->Fill( nbjets );
+      h_nleptons[7]->Fill( selElecsColl.size() + selMuonsColl.size() );
+      h_nmuons[7]->Fill( selMuonsColl.size() );
+      h_nelectrons[7]->Fill( selElecsColl.size() );
+      h_MET[7]->Fill( event.rec()->MET().pt() );
+      h_mtop[7]->Fill(topmass);
+      h_drjetpho[7]->Fill(dr_pho);
+
+      //exactly one bjets
+      if(nbjets < 1 || nbjets > 1 ) return true;
+      cutFlow2->Fill(4.);
+
+      h_photon1iso[8]->Fill( isolation(3, isoPhotonsColl[0] ) );
+      h_photon2iso[8]->Fill( isolation(3, isoPhotonsColl[1] ) );
+      h_photon1pt[8]->Fill( isoPhotonsColl[0].pt());
+      h_photon2pt[8]->Fill( isoPhotonsColl[1].pt());
+      h_diphotonM[8]->Fill( (isoph1+isoph2).M() );
+      h_nphotons[8]->Fill( isoPhotonsColl.size() );
+      h_njets[8]->Fill( selJetsColl.size() );
+      h_nbjets[8]->Fill( nbjets );
+      h_nleptons[8]->Fill( selElecsColl.size() + selMuonsColl.size() );
+      h_nmuons[8]->Fill( selMuonsColl.size() );
+      h_nelectrons[8]->Fill( selElecsColl.size() );
+      h_MET[8]->Fill( event.rec()->MET().pt() );
+      h_mtop[8]->Fill(topmass);
+      h_drjetpho[8]->Fill(dr_pho);
+
+      if( (topmass > 183.0) || (topmass < 163.0) ) return true;
+      cutFlow2->Fill(5.);
+    
+      h_photon1iso[9]->Fill( isolation(3, isoPhotonsColl[0] ) );
+      h_photon2iso[9]->Fill( isolation(3, isoPhotonsColl[1] ) );
+      h_photon1pt[9]->Fill( isoPhotonsColl[0].pt());
+      h_photon2pt[9]->Fill( isoPhotonsColl[1].pt());
+      h_diphotonM[9]->Fill( (isoph1+isoph2).M() );
+      h_nphotons[9]->Fill( isoPhotonsColl.size() );
+      h_njets[9]->Fill( selJetsColl.size() );
+      h_nbjets[9]->Fill( nbjets );
+      h_nleptons[9]->Fill( selElecsColl.size() + selMuonsColl.size() );
+      h_nmuons[9]->Fill( selMuonsColl.size() );
+      h_nelectrons[9]->Fill( selElecsColl.size() );
+      h_MET[9]->Fill( event.rec()->MET().pt() );
+      h_mtop[9]->Fill(topmass);
+      h_drjetpho[9]->Fill(dr_pho);
+
+
     }
      
   }
