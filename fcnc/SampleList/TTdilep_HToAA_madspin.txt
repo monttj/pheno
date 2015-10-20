@@ -1,0 +1,10 @@
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/TTdilep_HToAA_madspin/events_414766654.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/TTdilep_HToAA_madspin/events_414766655.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/TTdilep_HToAA_madspin/events_414766656.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/TTdilep_HToAA_madspin/events_414766657.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/TTdilep_HToAA_madspin/events_414766658.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/TTdilep_HToAA_madspin/events_414766659.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/TTdilep_HToAA_madspin/events_414766660.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/TTdilep_HToAA_madspin/events_414766661.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/TTdilep_HToAA_madspin/events_414766662.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/TTdilep_HToAA_madspin/events_414766663.root

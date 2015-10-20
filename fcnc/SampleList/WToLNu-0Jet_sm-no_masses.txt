@@ -1,0 +1,10 @@
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/WToLNu-0Jet_sm-no_masses/events_407763388.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/WToLNu-0Jet_sm-no_masses/events_407763389.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/WToLNu-0Jet_sm-no_masses/events_407763390.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/WToLNu-0Jet_sm-no_masses/events_407763391.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/WToLNu-0Jet_sm-no_masses/events_407763392.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/WToLNu-0Jet_sm-no_masses/events_407763393.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/WToLNu-0Jet_sm-no_masses/events_407763394.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/WToLNu-0Jet_sm-no_masses/events_407763395.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/WToLNu-0Jet_sm-no_masses/events_407763396.root
+dcap://maite.iihe.ac.be://pnfs/iihe/cms/store/user/dhondt/FCN_13TeV_IIHE_IPHC/Gridpacks/WToLNu-0Jet_sm-no_masses/events_407763397.root

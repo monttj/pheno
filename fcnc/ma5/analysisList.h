@@ -1,4 +1,4 @@
-#include "SampleAnalyzer/User/Analyzer/tcH.h"
+#include "SampleAnalyzer/User/Analyzer/FCNC_2P.h"
 #include "SampleAnalyzer/Process/Analyzer/AnalyzerManager.h"
 #include "SampleAnalyzer/Commons/Service/LogStream.h"
 
@@ -8,5 +8,5 @@
 void BuildUserTable(MA5::AnalyzerManager& manager)
 {
   using namespace MA5;
-  manager.Add("tcH",new tcH);
+  manager.Add("FCNC_2P",new FCNC_2P);
 }

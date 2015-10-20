@@ -348,7 +348,7 @@ unsigned int AnalysisHelper::isCSV(int flavour, float pT, float a_random) const
 
 
 // -----------------------------------------------------------------------------
-// track isolation
+// track isolation for lepton
 // -----------------------------------------------------------------------------
 double AnalysisHelper::TrackIsolationObservable(const RecLeptonFormat* part, AnalysisHelper::ConeType cone) const
 {
@@ -367,7 +367,26 @@ double AnalysisHelper::TrackIsolationObservable(const RecLeptonFormat* part, Ana
 
 
 // -----------------------------------------------------------------------------
-// calorimeter isolation
+// track isolation for photon
+// -----------------------------------------------------------------------------
+double AnalysisHelper::TrackIsolationObservable(const RecPhotonFormat* part, AnalysisHelper::ConeType cone) const
+{
+  // safety
+  if (part==0) return -999;
+  if (part->pt()<1e-6) return -999;
+  if (part->isolCones().size()==0) 
+  {
+    ERROR << "No isolation cone is found for the particle." << endmsg;
+    return -999;
+  }
+
+  // return isolation
+  return part->isolCones()[static_cast<unsigned int>(cone)].sumPT()/part->pt();
+}
+
+
+// -----------------------------------------------------------------------------
+// calorimeter isolation for lepton
 // -----------------------------------------------------------------------------
 double AnalysisHelper::CalorimeterIsolationObservable(const RecLeptonFormat* part, AnalysisHelper::ConeType cone) const
 {
@@ -386,7 +405,26 @@ double AnalysisHelper::CalorimeterIsolationObservable(const RecLeptonFormat* par
 
 
 // -----------------------------------------------------------------------------
-// PFlow isolation
+// calorimeter isolation for photon
+// -----------------------------------------------------------------------------
+double AnalysisHelper::CalorimeterIsolationObservable(const RecPhotonFormat* part, AnalysisHelper::ConeType cone) const
+{
+  // safety
+  if (part==0) return -999;
+  if (part->pt()<1e-6) return -999;
+  if (part->isolCones().size()==0) 
+  {
+    ERROR << "No isolation cone is found for the particle." << endmsg;
+    return -999;
+  }
+
+  // return isolation
+  return part->isolCones()[static_cast<unsigned int>(cone)].sumET()/part->pt();
+}
+
+
+// -----------------------------------------------------------------------------
+// PFlow isolation for lepton
 // -----------------------------------------------------------------------------
 double AnalysisHelper::PFlowIsolationObservable(const RecLeptonFormat* part, AnalysisHelper::ConeType cone) const
 {
@@ -403,8 +441,28 @@ double AnalysisHelper::PFlowIsolationObservable(const RecLeptonFormat* part, Ana
   return part->isolCones()[static_cast<unsigned int>(cone)].sumPTeflow()/part->pt();
 }
 
+
 // -----------------------------------------------------------------------------
-// combined isolation
+// PFlow isolation for photon
+// -----------------------------------------------------------------------------
+double AnalysisHelper::PFlowIsolationObservable(const RecPhotonFormat* part, AnalysisHelper::ConeType cone) const
+{
+  // safety
+  if (part==0) return -999;
+  if (part->pt()<1e-6) return -999;
+  if (part->isolCones().size()==0) 
+  {
+    ERROR << "No isolation cone is found for the particle." << endmsg;
+    return -999;
+  }
+
+  // return isolation
+  return part->isolCones()[static_cast<unsigned int>(cone)].sumPTeflow()/part->pt();
+}
+
+
+// -----------------------------------------------------------------------------
+// combined isolation for lepton
 // -----------------------------------------------------------------------------
 double AnalysisHelper::CombinedIsolationObservable(const RecLeptonFormat* part, AnalysisHelper::ConeType cone) const
 {
@@ -422,29 +480,44 @@ double AnalysisHelper::CombinedIsolationObservable(const RecLeptonFormat* part, 
           part->isolCones()[static_cast<unsigned int>(cone)].sumPT())/part->pt();
 }
 
+// -----------------------------------------------------------------------------
+// combined isolation for photon
+// -----------------------------------------------------------------------------
+double AnalysisHelper::CombinedIsolationObservable(const RecPhotonFormat* part, AnalysisHelper::ConeType cone) const
+{
+  // safety
+  if (part==0) return -999;
+  if (part->pt()<1e-6) return -999;
+  if (part->isolCones().size()==0) 
+  {
+    ERROR << "No isolation cone is found for the particle." << endmsg;
+    return -999;
+  }
+
+  // return isolation
+  return (part->isolCones()[static_cast<unsigned int>(cone)].sumET()     + 
+          part->isolCones()[static_cast<unsigned int>(cone)].sumPT())/part->pt();
+}
 
 // -----------------------------------------------------------------------------
 // JetCleaning
 // -----------------------------------------------------------------------------
 std::vector<const RecJetFormat*> 
-   AnalysisHelper::JetCleaning(const EventFormat& event, 
-                               const std::vector<const RecLeptonFormat*> leptons, 
+   AnalysisHelper::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets, 
+                               const std::vector<const RecLeptonFormat*>& leptons, 
                                double DeltaRmax, double PTmin) const
 {
   // cleaned collection of jets
   std::vector<const RecJetFormat*> cleaned_jets;
 
-  // safety
-  if (event.rec()==0) return cleaned_jets;
-
   // mask for jets
   // -> true = to remove
-  std::vector<bool> mask(event.rec()->jets().size(),false);
+  std::vector<bool> mask(uncleaned_jets.size(),false);
 
   // apply the cut on PT
-  for (unsigned int i=0;i<event.rec()->jets().size();i++)
+  for (unsigned int i=0;i<uncleaned_jets.size();i++)
   {
-    if (event.rec()->jets()[i].pt()<PTmin) mask[i]=true;
+    if (uncleaned_jets[i]->pt()<PTmin) mask[i]=true;
   }
 
   // loop over leptons
@@ -459,10 +532,10 @@ std::vector<const RecJetFormat*>
     double deltaR_min=0;
 
     // loop over jtes
-    for (unsigned int j=0;j<event.rec()->jets().size();j++)
+    for (unsigned int j=0;j<uncleaned_jets.size();j++)
     {
       // shortcut to jet
-      const RecJetFormat& jet = event.rec()->jets()[j];
+      const RecJetFormat& jet = *(uncleaned_jets[j]);
 
       // mask: the lepton has been already removed
       if (mask[j]) continue;
@@ -488,11 +561,255 @@ std::vector<const RecJetFormat*>
   }
 
   // save the jets
-  for (unsigned int i=0;i<event.rec()->jets().size();i++)
+  for (unsigned int i=0;i<uncleaned_jets.size();i++)
   {
-    if (!mask[i]) cleaned_jets.push_back(&event.rec()->jets()[i]);
+    if (!mask[i]) cleaned_jets.push_back(uncleaned_jets[i]);
   }
 
   // return the cleaned collection
   return cleaned_jets;
+}
+
+
+
+
+// -----------------------------------------------------------------------------
+// JetCleaning
+// -----------------------------------------------------------------------------
+std::vector<const RecJetFormat*> 
+   AnalysisHelper::JetCleaning(const std::vector<const RecJetFormat*>& uncleaned_jets, 
+                               const std::vector<const RecPhotonFormat*>& photons, 
+                               double DeltaRmax, double PTmin) const
+{
+  // cleaned collection of jets
+  std::vector<const RecJetFormat*> cleaned_jets;
+
+  // mask for jets
+  // -> true = to remove
+  std::vector<bool> mask(uncleaned_jets.size(),false);
+
+  // apply the cut on PT
+  for (unsigned int i=0;i<uncleaned_jets.size();i++)
+  {
+    if (uncleaned_jets[i]->pt()<PTmin) mask[i]=true;
+  }
+
+  // loop over photons
+  for (unsigned int i=0;i<photons.size();i++)
+  {
+    // safety 
+    if (photons[i]==0) continue;
+    if (photons[i]->pt()<1e-6) continue;
+
+    // 
+    int jet_index=-1;
+    double deltaR_min=0;
+
+    // loop over jtes
+    for (unsigned int j=0;j<uncleaned_jets.size();j++)
+    {
+      // shortcut to jet
+      const RecJetFormat& jet = *(uncleaned_jets[j]);
+
+      // mask: the photon has been already removed
+      if (mask[j]) continue;
+
+      // cut on DeltaR
+      double dr = photons[i]->momentum().DeltaR(jet.momentum());
+      if (dr>DeltaRmax) continue;
+      
+      // is it the closest photon to the jet?
+      if (jet_index==-1 || dr<deltaR_min)
+      {
+        deltaR_min=dr;
+        jet_index=j;
+      }
+    }
+
+    // is a photon matched the jet?
+    if (jet_index!=-1)
+    {
+      mask[jet_index]=true;
+    }
+
+  }
+
+  // save the jets
+  for (unsigned int i=0;i<uncleaned_jets.size();i++)
+  {
+    if (!mask[i]) cleaned_jets.push_back(uncleaned_jets[i]);
+  }
+
+  // return the cleaned collection
+  return cleaned_jets;
+}
+
+
+
+
+// -----------------------------------------------------------------------------
+// Sorting method
+// -----------------------------------------------------------------------------
+bool AnalysisHelper::SortLeptonPt(const RecLeptonFormat* lep1, const RecLeptonFormat* lep2)
+{
+  return (lep1->pt()<lep2->pt());
+}
+
+// -----------------------------------------------------------------------------
+// Fake electrons
+// -----------------------------------------------------------------------------
+bool AnalysisHelper::isFakeElectron(const RecJetFormat* jet)
+{
+  // Mis-ID probability for electrons (Cut-based ID, medium WP): CMS-EGM-13-001 (https://cds.cern.ch/record/1966959)
+  /***********************************************/
+  // Eta/Pt        | 10-15 | 15-20 | 20-30 | 30-40 | 40-50 | 50-Inf | Total
+  // |eta|<1.479   | 0.01  | 0.015 | 0.025 | 0.0275| 0.0325| 0.0325 | 0.1425
+  // 1.5<|eta|<2.5 | 0.015 | 0.025 | 0.035 | 0.035 | 0.035 | 0.035  | 0.1800
+  // safety check
+  if(jet==0) return false;
+  
+  // Ratio between genuine electrons with PF-iso<.2 and the number of fake (but not non-prompt) electrons with PF-iso<.2 (excluding the peak at 0 as it most likely originates from b/c)
+  double scale = 20.;
+  
+  // creates a randm number between 0-1.
+  double rdmnr = gRandom->Uniform()*scale;
+  
+  // to save some CPU time....
+  if(rdmnr>0.035) return false;
+
+  bool isFake = false;
+  float jetpt = jet->pt();
+  
+  if(fabs(jet->eta())<1.479){
+    if(     10<jetpt && jetpt<15){
+      if(rdmnr<0.0100) isFake = true;
+    }
+    else if(15<jetpt && jetpt<20){
+      if(rdmnr<0.0150) isFake = true;
+    }
+    else if(20<jetpt && jetpt<30){
+      if(rdmnr<0.0250) isFake = true;
+    }
+    else if(30<jetpt && jetpt<40){
+      if(rdmnr<0.0275) isFake = true;
+    }
+    else if(40<jetpt && jetpt<50){
+      if(rdmnr<0.0325) isFake = true;
+    }
+    else if(50<jetpt){
+      if(rdmnr<0.0325) isFake = true;
+    }
+    return isFake;
+  }
+  else if(fabs(jet->eta())<2.5){
+    if(     10<jetpt && jetpt<15){
+      if(rdmnr<0.0150) isFake = true;
+    }
+    else if(15<jetpt && jetpt<20){
+      if(rdmnr<0.0250) isFake = true;
+    }
+    else if(20<jetpt && jetpt<30){
+      if(rdmnr<0.0350) isFake = true;
+    }
+    else if(30<jetpt && jetpt<40){
+      if(rdmnr<0.0350) isFake = true;
+    }
+    else if(40<jetpt && jetpt<50){
+      if(rdmnr<0.0350) isFake = true;
+    }
+    else if(50<jetpt){
+      if(rdmnr<0.0350) isFake = true;
+    }
+    return isFake;
+  }
+  else
+    return isFake;
+}
+
+std::vector<const RecLeptonFormat*> AnalysisHelper::FakeElectrons(std::vector<const RecJetFormat*>& jets, bool removeJets, double PTmin, double ETAmax)
+{
+  // collection of fake electrons
+  std::vector<const RecLeptonFormat*> fakeelectrons;
+  
+  // jet collection iterator
+  std::vector<const RecJetFormat*>::iterator it_jet = jets.begin();
+
+  for( ;it_jet!= jets.end(); ){
+    // shortcut to jet
+    const RecJetFormat* jet = *it_jet;
+
+    if(isFakeElectron(jet)){
+      // apply pt/eta cut
+      if(jet->pt()<PTmin || fabs(jet->eta())>ETAmax) continue;
+      // cast the jet to a particle and use it to create a lepton
+      RecLeptonFormat* fake = new RecLeptonFormat(dynamic_cast<const RecParticleFormat*>(jet));
+      // define the electrical charge of the fake electron
+      fake->SetCharge((int)floor(gRandom->Uniform()*2));
+      // add a fake lepton to the lepton collection
+      fakeelectrons.push_back(fake);
+      // remove jet from the jet collection
+      if(removeJets){
+        it_jet = jets.erase(it_jet);
+      }
+      else{
+        ++it_jet;
+      }
+    }
+    else{
+      ++it_jet;
+    }
+  }
+  return fakeelectrons;
+}
+
+std::vector<const RecLeptonFormat*> AnalysisHelper::FakeElectrons(const EventFormat& event, double PTmin, double ETAmax)
+{
+  // collection of fake electrons
+  std::vector<const RecLeptonFormat*> fakeelectrons;
+  
+  // safety
+  if (event.rec()==0) return fakeelectrons;
+  
+  // loop over the jet collection
+  for (unsigned int i=0;i<event.rec()->jets().size();i++)
+  {
+    // shortcut to jet
+    const RecJetFormat& jet = event.rec()->jets()[i];
+    if(isFakeElectron(&jet)){
+      // apply pt/eta cut
+      if(jet.pt()<PTmin || fabs(jet.eta())>ETAmax) continue;
+      // cast the jet to a particle and use it to create a lepton
+      RecLeptonFormat* fake = new RecLeptonFormat(static_cast<const RecParticleFormat*>(&jet));
+      // define the electrical charge of the fake electron
+      fake->SetCharge((int)floor(gRandom->Uniform()*2));
+      // add a fake lepton to the lepton collection
+      fakeelectrons.push_back(fake);
+    }
+  }
+  return fakeelectrons;
+}
+
+void AnalysisHelper::FakeElectrons(const EventFormat& event, std::vector<const RecLeptonFormat*>& leptons, double PTmin, double ETAmax)
+{
+  // safety
+  if (event.rec()==0) return;
+  
+  // loop over the jet collection
+  for (unsigned int i=0;i<event.rec()->jets().size();i++)
+  {
+    // shortcut to jet
+    const RecJetFormat& jet = event.rec()->jets()[i];
+    if(isFakeElectron(&jet)){
+      // apply pt/eta cut
+      if(jet.pt()<PTmin || fabs(jet.eta())>ETAmax) continue;
+      // cast the jet to a particle and use it to create a lepton
+      RecLeptonFormat* fake = new RecLeptonFormat(static_cast<const RecParticleFormat*>(&jet));
+      // define the electrical charge of the fake electron
+      fake->SetCharge((int)floor(gRandom->Uniform()*2));
+      // add a fake lepton to the lepton collection
+      leptons.push_back(fake);
+    }
+  }
+  // sort leptons according to their pt
+  sort(leptons.begin(),leptons.end(),SortLeptonPt);
 }
