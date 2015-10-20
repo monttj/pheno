@@ -1,5 +1,5 @@
 /*
-root -l examples/Example1.C\(\"delphes_output.root\"\)
+root -l analyzer.C
 */
 
 //------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ void analyzer()
       Muon *mu1 = (Muon*) branchMuon->At(0);
       Muon *mu2 = (Muon*) branchMuon->At(1);
 
-      // Plot jet transverse momentum
+      // Plot di-muon invariant mass 
       histDiMuonMass->Fill(((mu1->P4()) + (mu2->P4())).M());
     }
  
