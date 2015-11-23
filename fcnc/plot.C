@@ -3,30 +3,30 @@ void plot(){
   gROOT->ProcessLine(".L ./tdrstyle.C");
   setTDRStyle();
 
-  TFile * AA = new TFile("sourceFiles/V10/AA.root");
-//  TFile * AA = new TFile("sourceFiles/V10/AA-0Jet_sm-no_masses.root");
-//  TFile * AA_1Jet = new TFile("sourceFiles/V10/AA-1Jet_sm-no_masses.root");
-//  TFile * AA_2Jets = new TFile("sourceFiles/V10/AA-2Jets_sm-no_masses.root");
-//  TFile * AA_3Jets = new TFile("sourceFiles/V10/AA-3Jets_sm-no_masses.root");
-  TFile * TTdilep_madspin = new TFile("sourceFiles/V10/TTdilep_madspin.root");
-  TFile * TTsemilep_madspin = new TFile("sourceFiles/V10/TTsemilep_madspin.root");
-  TFile * SingleTop = new TFile("sourceFiles/V10/SingleTop.root");
-  TFile * ZToLL = new TFile("sourceFiles/V10/ZToLL.root");
-//  TFile * TTsemilep_HToAA_madspin_1 = new TFile("sourceFiles/V10/TTdilep_HToAA_madspin.root");
-//  TFile * TTsemilep_HToAA_madspin_2 = new TFile("sourceFiles/V10/TTdilep_HToAA_madspin.root");
-//  TFile * ZToLL50_1Jet = new TFile("sourceFiles/V10/ZToLL50-1Jet_sm-no_masses.root");
-//  TFile * ZToLL50_2Jet = new TFile("sourceFiles/V10/ZToLL50-2Jets_sm-no_masses.root");
-//  TFile * ZToLL50_3Jet = new TFile("sourceFiles/V10/ZToLL50-3Jets_sm-no_masses.root");
-//  TFile * ZToLL50_4Jet = new TFile("sourceFiles/V10/ZToLL50-4Jets_sm-no_masses.root");
-//  TFile * WToLNu_0Jet = new TFile("sourceFiles/V10/WToLNu-0Jet_sm-no_masses.root");
-  TFile * WToLNu = new TFile("sourceFiles/V10/WToLNu.root");
-  //TFile * WToLNu_1Jet = new TFile("sourceFiles/V10/WToLNu-1Jet_sm-no_masses.root");
-  //TFile * WToLNu_2Jets = new TFile("sourceFiles/V10/WToLNu-2Jets_sm-no_masses.root");
-  //TFile * WToLNu_3Jets = new TFile("sourceFiles/V10/WToLNu-3Jets_sm-no_masses.root");
-  //TFile * WToLNu_4Jets = new TFile("sourceFiles/V10/WToLNu-4Jets_sm-no_masses.root");
-  TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V10/TT_Kappa_Hct_HtoAA.root");
-  //TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V10/TTtoLHtoGammaGamma-kappa-hct.root");
-  //TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V10/TTtoLHtoGammaGamma-kappa-hut.root");
+  TFile * AA = new TFile("sourceFiles/V11/AA.root");
+//  TFile * AA = new TFile("sourceFiles/V11/AA-0Jet_sm-no_masses.root");
+//  TFile * AA_1Jet = new TFile("sourceFiles/V11/AA-1Jet_sm-no_masses.root");
+//  TFile * AA_2Jets = new TFile("sourceFiles/V11/AA-2Jets_sm-no_masses.root");
+//  TFile * AA_3Jets = new TFile("sourceFiles/V11/AA-3Jets_sm-no_masses.root");
+  TFile * TTdilep_madspin = new TFile("sourceFiles/V11/TTdilep_madspin.root");
+  TFile * TTsemilep_madspin = new TFile("sourceFiles/V11/TTsemilep_madspin.root");
+  TFile * SingleTop = new TFile("sourceFiles/V11/SingleTop.root");
+  TFile * ZToLL = new TFile("sourceFiles/V11/ZToLL.root");
+//  TFile * TTsemilep_HToAA_madspin_1 = new TFile("sourceFiles/V11/TTdilep_HToAA_madspin.root");
+//  TFile * TTsemilep_HToAA_madspin_2 = new TFile("sourceFiles/V11/TTdilep_HToAA_madspin.root");
+//  TFile * ZToLL50_1Jet = new TFile("sourceFiles/V11/ZToLL50-1Jet_sm-no_masses.root");
+//  TFile * ZToLL50_2Jet = new TFile("sourceFiles/V11/ZToLL50-2Jets_sm-no_masses.root");
+//  TFile * ZToLL50_3Jet = new TFile("sourceFiles/V11/ZToLL50-3Jets_sm-no_masses.root");
+//  TFile * ZToLL50_4Jet = new TFile("sourceFiles/V11/ZToLL50-4Jets_sm-no_masses.root");
+//  TFile * WToLNu_0Jet = new TFile("sourceFiles/V11/WToLNu-0Jet_sm-no_masses.root");
+  TFile * WToLNu = new TFile("sourceFiles/V11/WToLNu.root");
+  //TFile * WToLNu_1Jet = new TFile("sourceFiles/V11/WToLNu-1Jet_sm-no_masses.root");
+  //TFile * WToLNu_2Jets = new TFile("sourceFiles/V11/WToLNu-2Jets_sm-no_masses.root");
+  //TFile * WToLNu_3Jets = new TFile("sourceFiles/V11/WToLNu-3Jets_sm-no_masses.root");
+  //TFile * WToLNu_4Jets = new TFile("sourceFiles/V11/WToLNu-4Jets_sm-no_masses.root");
+  TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V11/TT_Kappa_Hct_HtoAA.root");
+  //TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V11/TTtoLHtoGammaGamma-kappa-hct.root");
+  //TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V11/TTtoLHtoGammaGamma-kappa-hut.root");
   //TFile * HToAA = new TFile("old/HToAA.root");
   //TFile * WHToAA = new TFile("old/WHToAA.root");
   //TFile * ZHToAA = new TFile("old/ZHToAA.root");
@@ -386,8 +386,8 @@ void plot(){
         cout << "S/sqrt(S+B)= " << (sig)/sqrt(total_bkg+sig) << endl;
       }
 
-      c[i][j]->Print(Form("plots/V10/%s_%s.png", title.Data(), step.Data()));
-      c[i][j]->Print(Form("plots/V10/%s_%s.pdf", title.Data(), step.Data()));
+      c[i][j]->Print(Form("plots/V11/%s_%s.png", title.Data(), step.Data()));
+      c[i][j]->Print(Form("plots/V11/%s_%s.pdf", title.Data(), step.Data()));
     }
   }
 }
