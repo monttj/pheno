@@ -204,7 +204,7 @@ line.Draw()
 
 l = TLegend(0.6,0.6,0.8,0.8)
 l.AddEntry(final2,"n = 2","L")
-l.AddEntry("final3","n = 3","L")
+l.AddEntry(final3,"n = 3","L")
 l.AddEntry(final5,"n = 5","L")
 #l.AddEntry("final15","n = 15","L")
 l.SetTextSize(0.05);
