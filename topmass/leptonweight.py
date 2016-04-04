@@ -4,6 +4,8 @@ from ROOT import gROOT, TFile, TCanvas, TF1, TGraph, TPaveText, TLatex, TH1F, TL
 from array import array
 import ROOT
 
+nlo = 0 
+
 def GetIntegral( energy_muon, gr, integral ):
   tmp_integral = 0
   for nbin in range(1,nbins+1):
@@ -15,14 +17,66 @@ def GetIntegral( energy_muon, gr, integral ):
 
 import re
 
-histfile = TFile("hist.root","read")
+#histfile = TFile("hist_LO_noleptoncut.root","read")
+histfile = TFile("hist_LO_new_v2.root","read")
+objectname = "electron"
+energy_muon = histfile.Get("h_"+objectname+"_energy_reco")
+energy_muon.Rebin(2)
 
-energy_muon = histfile.Get("h_lepton_energy")
+c_reco_muon = TCanvas("c_reco_muon","c_reco_muon",1)
+energy_muon_reco = energy_muon.Clone("energy_muon_reco") 
+energy_muon_reco.Draw()
+energy_muon_reco.GetXaxis().SetTitle("Energy (GeV)")
+c_reco_muon.Print("energy_reco_"+objectname+".pdf")
+
+resfile = TFile("hist_LO_res.root","read")
+res_gen = resfile.Get("h_" + objectname + "_energy")
+res_reco = resfile.Get("h_" + objectname + "_energy_reco")
+res_gen.Rebin(2)
+res_reco.Rebin(2)
+
+h_acc = res_gen.Clone("h_acc")
+
+for i in range(0,energy_muon.GetNbinsX()):
+  y = energy_muon.GetBinContent(i+1)
+  y_gen = res_gen.GetBinContent(i+1)
+  y_reco = res_reco.GetBinContent(i+1)
+  #print i, " " , y_reco
+  if i <= 10:
+    energy_muon.SetBinContent(i+1, y_gen)
+    h_acc.SetBinContent(i+1, 0)
+  else:
+    acc = 0
+    if y_reco > 0:
+      corr = y_gen / y_reco
+      acc = y_reco / y_gen
+    else:
+      corr = 0
+    
+    energy_muon.SetBinContent(i+1, y*corr)
+    h_acc.SetBinContent(i+1, acc)
+
+c_acceptance = TCanvas("c_acceptance","c_acceptance",1)
+h_acc.Draw()
+h_acc.GetXaxis().SetTitle("Energy (GeV)")
+h_acc.SetTitle("Acceptance (reco/gen)")
+c_acceptance.Print("acceptance_"+objectname+".pdf")
+
+#f1 = TF1("f1","[0] + [1] * x + [2] * x * x +[3] * x * x * x", 0, 400)
+
+#energy_muon.Fit("f1","R") 
+#response = resfile.Get("res_" + objectname)
+#energy_muon.Divide( response )
 
 c_energy = TCanvas("c_energy","c_energy",1)
 energy_muon.Draw()
 energy_muon.GetXaxis().SetTitle("Energy (GeV)")
-c_energy.Print("leptonenergy.pdf")
+energy_muon.SetTitle("Unfolded distribution")
+if nlo :
+  c_energy.Print("energy_NLO_"+objectname+".pdf")
+else :
+  c_energy.Print("energy_LO_"+objectname+".pdf")
+
 
 nevents = energy_muon.Integral()
 energy_muon.Scale(1.0/float(nevents))
@@ -30,10 +84,10 @@ nbins = energy_muon.GetNbinsX()
 
 files = []
 
-f15 = open("Numtab_Obs15_NLOTopDecay_m150-200.m","r")
-f5 = open("Numtab_Obs5_NLOTopDecay_m150-200.m","r")
-f3 = open("Numtab_Obs3_NLOTopDecay_m150-200.m","r")
-f2 = open("Numtab_Obs2_NLOTopDecay_m150-200.m","r")
+f15 = open("Numtab_WF15_LOTopDecay.m","r")
+f5 = open("Numtab_WF5_LOTopDecay.m","r")
+f3 = open("Numtab_WF3_LOTopDecay.m","r")
+f2 = open("Numtab_WF2_LOTopDecay.m","r")
 
 files.append( f2 )
 files.append( f3 )
@@ -100,7 +154,7 @@ for f in files:
       massidx = massidx + 1
       i= 1
 
-    if i > 1700 :
+    if i > 1950 :
       continue
     else:
       myenergy[massidx].append( float(out[1]) )
@@ -189,7 +243,7 @@ for i in range(0,nmymass):
 final2.Draw("AC")
 final3.Draw("C")
 final5.Draw("C")
-#final15.Draw("C")
+final15.Draw("C")
 
 final2.GetXaxis().SetTitle("m_{t} (GeV)")
 final2.SetLineColor(ROOT.kGreen)
@@ -198,18 +252,30 @@ final5.SetLineColor(ROOT.kRed)
 final15.SetLineColor(ROOT.kOrange+1)
 
 
-line = TLine(145,0,205,0);
-line.SetLineWidth(1)
-line.Draw()
+linex = TLine(145,0,205,0);
+linex.SetLineWidth(1)
+linex.Draw()
+
+liney = TLine(173,-0.0085,173,0.00725);
+if nlo :
+  liney = TLine(173,-0.01025,173,0.0055);
+liney.SetLineWidth(1)
+liney.SetLineStyle(2)
+liney.Draw()
 
 l = TLegend(0.6,0.6,0.8,0.8)
+if nlo :
+  l = TLegend(0.6,0.65,0.8,0.85)
 l.AddEntry(final2,"n = 2","L")
 l.AddEntry(final3,"n = 3","L")
 l.AddEntry(final5,"n = 5","L")
-#l.AddEntry("final15","n = 15","L")
+l.AddEntry(final15,"n = 15","L")
 l.SetTextSize(0.05);
 l.SetLineColor(0);
 l.SetFillColor(0);
 l.Draw()
 
-wlepton.Print("integralmass.pdf")
+if nlo :
+  wlepton.Print("integralmass_NLO_"+objectname+".pdf")
+else :
+  wlepton.Print("integralmass_LO_"+objectname+".pdf")
