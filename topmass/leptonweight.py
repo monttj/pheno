@@ -17,11 +17,17 @@ def GetIntegral( energy_muon, gr, integral ):
 
 import re
 
+renbins = 2 
+
 #histfile = TFile("hist_LO_noleptoncut.root","read")
-histfile = TFile("hist_LO_new_v2.root","read")
-objectname = "electron"
-energy_muon = histfile.Get("h_"+objectname+"_energy_reco")
-energy_muon.Rebin(2)
+histfile = TFile("hist_LO_reco_v3.root","read")
+#histfile = TFile("hist_NLO.root","read")
+objectname = "lepton"
+gen_histogram_name = "h_"+objectname+"_energy"
+reco_histogram_name = "h_"+objectname+"_energy_reco_final" 
+energy_muon = histfile.Get( reco_histogram_name )
+#energy_muon = histfile.Get( gen_histogram_name )
+energy_muon.Rebin( renbins )
 
 c_reco_muon = TCanvas("c_reco_muon","c_reco_muon",1)
 energy_muon_reco = energy_muon.Clone("energy_muon_reco") 
@@ -29,11 +35,16 @@ energy_muon_reco.Draw()
 energy_muon_reco.GetXaxis().SetTitle("Energy (GeV)")
 c_reco_muon.Print("energy_reco_"+objectname+".pdf")
 
-resfile = TFile("hist_LO_res.root","read")
-res_gen = resfile.Get("h_" + objectname + "_energy")
-res_reco = resfile.Get("h_" + objectname + "_energy_reco")
-res_gen.Rebin(2)
-res_reco.Rebin(2)
+resfile = TFile("hist_LO_res_v3.root","read")
+#resfile = TFile("hist_NLO.root","read")
+res_gen = resfile.Get( "h_lepton_energy" )
+res_reco = resfile.Get( reco_histogram_name )
+efficiency = resfile.Get( "h_efficiency_lepton" )
+acceptance = resfile.Get( "h_acceptance_lepton" )
+res_gen.Rebin( renbins )
+res_reco.Rebin( renbins )
+efficiency.Rebin( renbins )
+acceptance.Rebin( renbins )
 
 h_acc = res_gen.Clone("h_acc")
 
@@ -41,20 +52,41 @@ for i in range(0,energy_muon.GetNbinsX()):
   y = energy_muon.GetBinContent(i+1)
   y_gen = res_gen.GetBinContent(i+1)
   y_reco = res_reco.GetBinContent(i+1)
+  y_eff = efficiency.GetBinContent(i+1)
+  y_acc = acceptance.GetBinContent(i+1)
   #print i, " " , y_reco
-  if i <= 10:
+  if i < 30/renbins:
     energy_muon.SetBinContent(i+1, y_gen)
     h_acc.SetBinContent(i+1, 0)
   else:
     acc = 0
-    if y_reco > 0:
+    if y_reco > 0 and y > 0:
       corr = y_gen / y_reco
       acc = y_reco / y_gen
+      #print "acc= ", acc, " acc from hist= ", y_acc, " ", y_eff
+      #energy_muon.SetBinContent(i+1, y*corr)
     else:
-      corr = 0
+      print "zero reco"
+      #energy_muon.SetBinContent(i+1, y_gen)
     
-    energy_muon.SetBinContent(i+1, y*corr)
+    #energy_muon.SetBinContent(i+1, y*1.0/(y_eff*y_acc))
     h_acc.SetBinContent(i+1, acc)
+
+f5 = TF1("f5","[0]+[1]*x+[2]*x*x+[3]*x*x*x+[4]*x*x*x*x+[5]*x*x*x*x*x",30,400);
+h_acc.Fit("f5","R")
+
+for i in range(0,energy_muon.GetNbinsX()):
+  y = energy_muon.GetBinContent(i+1)
+  y_gen = res_gen.GetBinContent(i+1)
+  if i < 30/renbins:
+    energy_muon.SetBinContent(i+1, y_gen)
+  else:
+    val = h_acc.GetBinLowEdge(i+1)+h_acc.GetBinWidth(i+1)/2.0
+    #corr = 1.0/f5.Eval( 2*(i+1)-1 )
+    print 2*(i+1)-1
+    corr = 1.0/h_acc.GetBinContent(i+1)
+    energy_muon.SetBinContent(i+1, y*corr)
+
 
 c_acceptance = TCanvas("c_acceptance","c_acceptance",1)
 h_acc.Draw()
@@ -154,7 +186,7 @@ for f in files:
       massidx = massidx + 1
       i= 1
 
-    if i > 1950 :
+    if i > 1800 :
       continue
     else:
       myenergy[massidx].append( float(out[1]) )
@@ -175,6 +207,7 @@ for f in files:
     y = array('f',myvalue[j])
     if nfile == 0:
       gr = TGraph(len(x), x, y)
+      gr.Write()
       GetIntegral( energy_muon, gr, integral2)
       if mymass[j] == 173:
         gr2 = TGraph(len(x), x, y)
@@ -185,6 +218,7 @@ for f in files:
         gr2.GetXaxis().SetTitle("Energy (GeV)")
     elif nfile == 1:
       gr = TGraph(len(x), x, y)
+      gr.Write()
       GetIntegral( energy_muon, gr, integral3)
       if mymass[j] == 173:
         gr3 = TGraph(len(x), x, y)
@@ -192,6 +226,7 @@ for f in files:
         gr3.SetLineColor(ROOT.kBlue)
     elif nfile == 2:
       gr = TGraph(len(x), x, y)
+      gr.Write()
       GetIntegral( energy_muon, gr, integral5)
       if mymass[j] == 173:
         gr5 = TGraph(len(x), x, y)
@@ -199,6 +234,7 @@ for f in files:
         gr5.SetLineColor(ROOT.kRed)
     else:
       gr = TGraph(len(x), x, y)
+      gr.Write()
       GetIntegral( energy_muon, gr, integral15)
       if mymass[j] == 173:
         gr15 = TGraph(len(x), x, y)
