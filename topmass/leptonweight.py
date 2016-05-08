@@ -1,6 +1,6 @@
 #! /usr/bin/env python 
 
-from ROOT import gROOT, TFile, TCanvas, TF1, TGraph, TPaveText, TLatex, TH1F, TLegend, TLine, TColor
+from ROOT import gROOT, TFile, TCanvas, TF1, TGraph, TPaveText, TLatex, TH1F, TLegend, TLine, TColor, TIter
 from array import array
 import ROOT
 
@@ -116,149 +116,51 @@ nbins = energy_muon.GetNbinsX()
 
 files = []
 
-f15 = open("Numtab_WF15_LOTopDecay.m","r")
-f5 = open("Numtab_WF5_LOTopDecay.m","r")
-f3 = open("Numtab_WF3_LOTopDecay.m","r")
-f2 = open("Numtab_WF2_LOTopDecay.m","r")
+f15 = TFile("weightfunc15.root","read")
+f5 = TFile("weightfunc5.root","read")
+f3 = TFile("weightfunc3.root","read")
+f2 = TFile("weightfunc2.root","read")
 
 files.append( f2 )
 files.append( f3 )
 files.append( f5 )
 files.append( f15 )
 
-gr2 = TGraph()
-gr3 = TGraph()
-gr5 = TGraph()
-gr15 = TGraph()
-
 integral2 = []
 integral3 = []
 integral5 = []
 integral15 = []
 
-mymass = []
+mymass2 = []
+mymass3 = []
+mymass5 = []
+mymass15 = []
 
-c= TCanvas("c","c",1)
 nfile = 0
 for f in files:
-
-  total = ""
-  for line in f:
-    total += line
-
-  weights = re.split("{{", total)
-
-  i = 0
-  massidx = 0
-
-  myenergy = [ [] ]
-  myvalue = [ [] ]
-  mymass = []
-
-  mass = []
-  energy = []
-  value = [] 
-
-  for weight in weights:
-    if i == 0:
-      i = i+1
+  
+  dirlist =  f.GetListOfKeys()
+  iter = dirlist.MakeIterator()
+  key = iter.Next()
+  while key :
+    cl = gROOT.GetClass( key.GetClassName())
+    if cl.InheritsFrom("TGraph") == 0: 
       continue
- 
-    tmp = re.sub('{','',weight) 
-    tmp1 = re.sub('}','',tmp) 
-    tmp2 = re.sub('\n','',tmp1)
-    tmp3 = re.sub(' ','',tmp2)
-    tmp4 = re.sub('\*\^','1e',tmp3)
-    out = tmp4.split(",") 
-
-    #print out
-
-    mass.append( float(out[0]) )
-    energy.append( float(out[1]) )
-    value.append( float(out[2]) ) 
-
-    if i == 1:
-      mymass.append( float(out[0]) )  
-    if i > 1 and mass[len(mass)-2] != mass[len(mass)-1]: 
-      mymass.append( mass[len(mass)-1] )
-      myenergy.append( [] )
-      myvalue.append( [] )
-      massidx = massidx + 1
-      i= 1
-
-    if i > 1800 :
-      continue
-    else:
-      myenergy[massidx].append( float(out[1]) )
-      myvalue[massidx].append( float(out[2]) )  
-
-    i = i + 1
-
-#print myenergy[0]
-#print myvalue[0]
-
-  energylen =  len(myenergy)
-  masslen =  len(mymass)
-  if energylen != masslen: 
-    print "WRONG!!!!!!!!!!!!!!!!!!!!!"
-
-  for j in range(0,massidx+1): 
-    x = array('f',myenergy[j])
-    y = array('f',myvalue[j])
+    gr = key.ReadObj();
     if nfile == 0:
-      gr = TGraph(len(x), x, y)
-      gr.Write()
+      mymass2.append(float(gr.GetName()))
       GetIntegral( energy_muon, gr, integral2)
-      if mymass[j] == 173:
-        gr2 = TGraph(len(x), x, y)
-        gr2.Draw("AC");
-        gr2.SetLineColor(ROOT.kGreen)
-        gr2.SetMaximum(0.3);
-        gr2.SetMinimum(-1.0);
-        gr2.GetXaxis().SetTitle("Energy (GeV)")
     elif nfile == 1:
-      gr = TGraph(len(x), x, y)
-      gr.Write()
-      GetIntegral( energy_muon, gr, integral3)
-      if mymass[j] == 173:
-        gr3 = TGraph(len(x), x, y)
-        gr3.Draw("C");
-        gr3.SetLineColor(ROOT.kBlue)
+      mymass3.append(float(gr.GetName()))
+      GetIntegral( energy_muon, gr, integral3) 
     elif nfile == 2:
-      gr = TGraph(len(x), x, y)
-      gr.Write()
+      mymass5.append(float(gr.GetName()))
       GetIntegral( energy_muon, gr, integral5)
-      if mymass[j] == 173:
-        gr5 = TGraph(len(x), x, y)
-        gr5.Draw("C");
-        gr5.SetLineColor(ROOT.kRed)
-    else:
-      gr = TGraph(len(x), x, y)
-      gr.Write()
+    elif nfile == 3:
+      mymass15.append(float(gr.GetName()))
       GetIntegral( energy_muon, gr, integral15)
-      if mymass[j] == 173:
-        gr15 = TGraph(len(x), x, y)
-        gr15.Draw("C");
-        gr15.SetLineColor(ROOT.kOrange+1)
-
+    key = iter.Next()
   nfile = nfile + 1
-
-line = TLine(0,0,147.5,0);
-line.SetLineWidth(1)
-line.Draw()
-
-l = TLegend(0.65,0.2,0.85,0.5)
-l.SetHeader("m_{t} = 173 GeV")
-l.AddEntry(gr2,"n = 2","L")
-l.AddEntry(gr3,"n = 3","L")
-l.AddEntry(gr5,"n = 5","L")
-l.AddEntry(gr15,"n = 15","L")
-l.SetTextSize(0.05);
-l.SetLineColor(0);
-l.SetFillColor(0);
-l.Draw()
-
-c.Print("weightfunc.pdf")
 
 wlepton = TCanvas("wlepton","wlepton",1)
 
@@ -268,13 +170,13 @@ final5 = TGraph()
 final15 = TGraph()
 
 nintegral = len(integral2)
-nmymass = len(mymass)
+nmymass = len(mymass2)
 
 for i in range(0,nmymass):
-  final2.SetPoint(i, mymass[i], integral2[i])
-  final3.SetPoint(i, mymass[i], integral3[i])
-  final5.SetPoint(i, mymass[i], integral5[i])
-  final15.SetPoint(i, mymass[i], integral15[i])
+  final2.SetPoint(i, mymass2[i], integral2[i])
+  final3.SetPoint(i, mymass3[i], integral3[i])
+  final5.SetPoint(i, mymass5[i], integral5[i])
+  final15.SetPoint(i, mymass15[i], integral15[i])
   
 final2.Draw("AC")
 final3.Draw("C")
