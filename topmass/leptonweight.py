@@ -17,11 +17,9 @@ def GetIntegral( energy_muon, gr, integral ):
 
 import re
 
-renbins = 2 
+renbins = 1 
 
-#histfile = TFile("hist_LO_noleptoncut.root","read")
 histfile = TFile("hist_LO_reco_v3.root","read")
-#histfile = TFile("hist_NLO.root","read")
 objectname = "lepton"
 gen_histogram_name = "h_"+objectname+"_energy"
 reco_histogram_name = "h_"+objectname+"_energy_reco_final" 
@@ -36,7 +34,6 @@ energy_muon_reco.GetXaxis().SetTitle("Energy (GeV)")
 c_reco_muon.Print("energy_reco_"+objectname+".pdf")
 
 resfile = TFile("hist_LO_res_v3.root","read")
-#resfile = TFile("hist_NLO.root","read")
 res_gen = resfile.Get( "h_lepton_energy" )
 res_reco = resfile.Get( reco_histogram_name )
 efficiency = resfile.Get( "h_efficiency_lepton" )
@@ -49,27 +46,16 @@ acceptance.Rebin( renbins )
 h_acc = res_gen.Clone("h_acc")
 
 for i in range(0,energy_muon.GetNbinsX()):
-  y = energy_muon.GetBinContent(i+1)
   y_gen = res_gen.GetBinContent(i+1)
   y_reco = res_reco.GetBinContent(i+1)
-  y_eff = efficiency.GetBinContent(i+1)
-  y_acc = acceptance.GetBinContent(i+1)
-  #print i, " " , y_reco
   if i < 30/renbins:
-    energy_muon.SetBinContent(i+1, y_gen)
     h_acc.SetBinContent(i+1, 0)
   else:
     acc = 0
-    if y_reco > 0 and y > 0:
-      corr = y_gen / y_reco
+    if y_reco > 0:
       acc = y_reco / y_gen
-      #print "acc= ", acc, " acc from hist= ", y_acc, " ", y_eff
-      #energy_muon.SetBinContent(i+1, y*corr)
     else:
       print "zero reco"
-      #energy_muon.SetBinContent(i+1, y_gen)
-    
-    #energy_muon.SetBinContent(i+1, y*1.0/(y_eff*y_acc))
     h_acc.SetBinContent(i+1, acc)
 
 f5 = TF1("f5","[0]+[1]*x+[2]*x*x+[3]*x*x*x+[4]*x*x*x*x+[5]*x*x*x*x*x",30,400);
@@ -83,7 +69,6 @@ for i in range(0,energy_muon.GetNbinsX()):
   else:
     val = h_acc.GetBinLowEdge(i+1)+h_acc.GetBinWidth(i+1)/2.0
     #corr = 1.0/f5.Eval( 2*(i+1)-1 )
-    print 2*(i+1)-1
     corr = 1.0/h_acc.GetBinContent(i+1)
     energy_muon.SetBinContent(i+1, y*corr)
 
@@ -94,12 +79,6 @@ h_acc.GetXaxis().SetTitle("Energy (GeV)")
 h_acc.SetTitle("Acceptance (reco/gen)")
 c_acceptance.Print("acceptance_"+objectname+".pdf")
 
-#f1 = TF1("f1","[0] + [1] * x + [2] * x * x +[3] * x * x * x", 0, 400)
-
-#energy_muon.Fit("f1","R") 
-#response = resfile.Get("res_" + objectname)
-#energy_muon.Divide( response )
-
 c_energy = TCanvas("c_energy","c_energy",1)
 energy_muon.Draw()
 energy_muon.GetXaxis().SetTitle("Energy (GeV)")
@@ -108,7 +87,6 @@ if nlo :
   c_energy.Print("energy_NLO_"+objectname+".pdf")
 else :
   c_energy.Print("energy_LO_"+objectname+".pdf")
-
 
 nevents = energy_muon.Integral()
 energy_muon.Scale(1.0/float(nevents))
