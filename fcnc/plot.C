@@ -1,32 +1,32 @@
 void plot(){
 
-  gROOT->ProcessLine(".L ./tdrstyle.C");
-  setTDRStyle();
+  //gROOT->ProcessLine(".L ./tdrstyle.C");
+  //setTDRStyle();
 
-  TFile * AA = new TFile("sourceFiles/V11/AA.root");
-//  TFile * AA = new TFile("sourceFiles/V11/AA-0Jet_sm-no_masses.root");
-//  TFile * AA_1Jet = new TFile("sourceFiles/V11/AA-1Jet_sm-no_masses.root");
-//  TFile * AA_2Jets = new TFile("sourceFiles/V11/AA-2Jets_sm-no_masses.root");
-//  TFile * AA_3Jets = new TFile("sourceFiles/V11/AA-3Jets_sm-no_masses.root");
-  TFile * TTdilep_madspin = new TFile("sourceFiles/V11/TTdilep_madspin.root");
-  TFile * TTsemilep_madspin = new TFile("sourceFiles/V11/TTsemilep_madspin.root");
-  TFile * SingleTop = new TFile("sourceFiles/V11/SingleTop.root");
-  TFile * ZToLL = new TFile("sourceFiles/V11/ZToLL.root");
-//  TFile * TTsemilep_HToAA_madspin_1 = new TFile("sourceFiles/V11/TTdilep_HToAA_madspin.root");
-//  TFile * TTsemilep_HToAA_madspin_2 = new TFile("sourceFiles/V11/TTdilep_HToAA_madspin.root");
-//  TFile * ZToLL50_1Jet = new TFile("sourceFiles/V11/ZToLL50-1Jet_sm-no_masses.root");
-//  TFile * ZToLL50_2Jet = new TFile("sourceFiles/V11/ZToLL50-2Jets_sm-no_masses.root");
-//  TFile * ZToLL50_3Jet = new TFile("sourceFiles/V11/ZToLL50-3Jets_sm-no_masses.root");
-//  TFile * ZToLL50_4Jet = new TFile("sourceFiles/V11/ZToLL50-4Jets_sm-no_masses.root");
-//  TFile * WToLNu_0Jet = new TFile("sourceFiles/V11/WToLNu-0Jet_sm-no_masses.root");
-  TFile * WToLNu = new TFile("sourceFiles/V11/WToLNu.root");
-  //TFile * WToLNu_1Jet = new TFile("sourceFiles/V11/WToLNu-1Jet_sm-no_masses.root");
-  //TFile * WToLNu_2Jets = new TFile("sourceFiles/V11/WToLNu-2Jets_sm-no_masses.root");
-  //TFile * WToLNu_3Jets = new TFile("sourceFiles/V11/WToLNu-3Jets_sm-no_masses.root");
-  //TFile * WToLNu_4Jets = new TFile("sourceFiles/V11/WToLNu-4Jets_sm-no_masses.root");
-  TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V11/TT_Kappa_Hct_HtoAA.root");
-  //TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V11/TTtoLHtoGammaGamma-kappa-hct.root");
-  //TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V11/TTtoLHtoGammaGamma-kappa-hut.root");
+  TFile * AA = new TFile("sourceFiles/V10/AA.root");
+//  TFile * AA = new TFile("sourceFiles/V10/AA-0Jet_sm-no_masses.root");
+//  TFile * AA_1Jet = new TFile("sourceFiles/V10/AA-1Jet_sm-no_masses.root");
+//  TFile * AA_2Jets = new TFile("sourceFiles/V10/AA-2Jets_sm-no_masses.root");
+//  TFile * AA_3Jets = new TFile("sourceFiles/V10/AA-3Jets_sm-no_masses.root");
+  TFile * TTdilep_madspin = new TFile("sourceFiles/V10/TTdilep_madspin.root");
+  TFile * TTsemilep_madspin = new TFile("sourceFiles/V10/TTsemilep_madspin.root");
+  TFile * SingleTop = new TFile("sourceFiles/V10/SingleTop.root");
+  TFile * ZToLL = new TFile("sourceFiles/V10/ZToLL.root");
+//  TFile * TTsemilep_HToAA_madspin_1 = new TFile("sourceFiles/V10/TTdilep_HToAA_madspin.root");
+//  TFile * TTsemilep_HToAA_madspin_2 = new TFile("sourceFiles/V10/TTdilep_HToAA_madspin.root");
+//  TFile * ZToLL50_1Jet = new TFile("sourceFiles/V10/ZToLL50-1Jet_sm-no_masses.root");
+//  TFile * ZToLL50_2Jet = new TFile("sourceFiles/V10/ZToLL50-2Jets_sm-no_masses.root");
+//  TFile * ZToLL50_3Jet = new TFile("sourceFiles/V10/ZToLL50-3Jets_sm-no_masses.root");
+//  TFile * ZToLL50_4Jet = new TFile("sourceFiles/V10/ZToLL50-4Jets_sm-no_masses.root");
+//  TFile * WToLNu_0Jet = new TFile("sourceFiles/V10/WToLNu-0Jet_sm-no_masses.root");
+  TFile * WToLNu = new TFile("sourceFiles/V10/WToLNu.root");
+  //TFile * WToLNu_1Jet = new TFile("sourceFiles/V10/WToLNu-1Jet_sm-no_masses.root");
+  //TFile * WToLNu_2Jets = new TFile("sourceFiles/V10/WToLNu-2Jets_sm-no_masses.root");
+  //TFile * WToLNu_3Jets = new TFile("sourceFiles/V10/WToLNu-3Jets_sm-no_masses.root");
+  //TFile * WToLNu_4Jets = new TFile("sourceFiles/V10/WToLNu-4Jets_sm-no_masses.root");
+  //TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V10/TT_Kappa_Hct_HtoAA.root");
+  TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V10/TTtoLHtoGammaGamma-kappa-hct.root");
+  //TFile * TT_Kappa_Hct_HtoAA = new TFile("sourceFiles/V10/TTtoLHtoGammaGamma-kappa-hut.root");
   //TFile * HToAA = new TFile("old/HToAA.root");
   //TFile * WHToAA = new TFile("old/WHToAA.root");
   //TFile * ZHToAA = new TFile("old/ZHToAA.root");
@@ -58,6 +58,10 @@ void plot(){
   //TH1 * h_HToAA[ni][nj];
   //TH1 * h_WHToAA[ni][nj];
   //TH1 * h_ZHToAA[ni][nj];
+
+
+  TH1 * h_signal;
+  TH1 * h_background;
 
   TCanvas *c[ni][nj];
   THStack *s[ni][nj];
@@ -112,6 +116,7 @@ void plot(){
         xtitle = "Jet multiplicity";
         ytitle = "Events";
         ymax = 14000;
+        log = true;
       }
       if( j == 3) {
         title = "nbjetsCSVT";
@@ -123,6 +128,7 @@ void plot(){
         title = "nleptons";
         xtitle = "Lepton multiplicity";
         ytitle = "Events";
+        log = true;
       }
       if( j == 5 ) {
         title = "photon1iso";
@@ -160,10 +166,10 @@ void plot(){
           if( i == 2 ) ymax = 10000;
           if( i == 2 ) ymax = 10000;
         } else { 
-          log = true;
+          log = false;
           ymin = 0.0001;
-          if( i == 3 ) ymax = 1000;
-          if( i > 3 ) ymax = 24.0;
+          if( i == 3 ) ymax = 10000;
+          if( i > 3 ) ymax = 8.0;
         }
       }
       if( j == 10 ){
@@ -237,17 +243,19 @@ void plot(){
 
 
       // Rebin for top mass //
-      if( j == 9 ){
+      if( j == 1 || j == 9 ){
+      //if( j == 9 ){
+      //if( false ){
         //cout << "rebin histogram for mtop" << endl;
-        h_AA[i][j]->Rebin(4);
-        h_TTdilep_madspin[i][j]->Rebin(4);
-        h_TTsemilep_madspin[i][j]->Rebin(4);
-        h_SingleTop[i][j]->Rebin(4);
-        h_ZToLL[i][j]->Rebin(4);
-        h_WToLNu[i][j]->Rebin(4);
-        h_TT_Kappa_Hct_HtoAA[i][j]->Rebin(4);
+        h_AA[i][j]->Rebin(2);
+        h_TTdilep_madspin[i][j]->Rebin(2);
+        h_TTsemilep_madspin[i][j]->Rebin(2);
+        h_SingleTop[i][j]->Rebin(2);
+        h_ZToLL[i][j]->Rebin(2);
+        h_WToLNu[i][j]->Rebin(2);
+        h_TT_Kappa_Hct_HtoAA[i][j]->Rebin(2);
       }
-      
+     
       c[i][j] = new TCanvas(Form("%s_%s",step.Data(), title.Data()),Form("%s_%s",step.Data(), title.Data()), 1);
       s[i][j] = new THStack(Form("%s_%s",step.Data(), title.Data()),Form("%s_%s",step.Data(), title.Data()));
 
@@ -257,7 +265,7 @@ void plot(){
 
       TH1F * h_Backgrounds;
 
-      if( i >= 3 && i <=5 ) { 
+      if( i >= 4 && i <=5 ) { 
         h_Backgrounds = (TH1F*) h_TTsemilep_madspin[2][j]->Clone("h_Backgrounds");
         TH1F * tmp_h_AA = (TH1F*) h_AA[2][j]->Clone("tmp_h_AA");
         TH1F * tmp_TTdilep_madspin = (TH1F*) h_TTdilep_madspin[2][j]->Clone("tmp_TTdilep_madspin");
@@ -300,17 +308,17 @@ void plot(){
    //Set Color   
       h_Backgrounds->SetFillColor(kBlue);
       h_AA[i][j]->SetFillColor(6);
-      h_SingleTop[i][j]->SetFillColor(8);
-      h_ZToLL[i][j]->SetFillColor(kBlue);
-      h_WToLNu[i][j]->SetFillColor(7);
+      h_SingleTop[i][j]->SetFillColor(4);
+      h_ZToLL[i][j]->SetFillColor(12);
+      h_WToLNu[i][j]->SetFillColor(8);
       h_TTdilep_madspin[i][j]->SetFillColor(kRed);
       h_TTsemilep_madspin[i][j]->SetFillColor(kRed+2);
-
+      
       s[i][j]->Draw();
 
      //Signal
       TH1F * tmp_sig = (TH1F*) h_TT_Kappa_Hct_HtoAA[i][j]->Clone("tmp_sig");
-      if( i <= 2){
+      if( i <= 3){
         tmp_sig->Scale(100);
         tmp_sig->Draw("same");
         tmp_sig->SetLineWidth(3);        
@@ -320,18 +328,24 @@ void plot(){
       }
       //h_TT_Kappa_Hct_HtoAA[i][j]->Scale(0.00228); // Higgs to gamma gamma at 125 GeV = 2.28 x 10^-3 
       //h_TT_Kappa_Hct_HtoAA[i][j]->Scale(100); // Higgs to gamma gamma at 125 GeV = 2.28 x 10^-3 
-      s[i][j]->SetTitle( title.Data() );
+      //s[i][j]->SetTitle( title.Data() );
+      s[i][j]->SetTitle("");
       s[i][j]->GetYaxis()->SetTitle( ytitle.Data() );
       s[i][j]->GetXaxis()->SetTitle( xtitle.Data() );
       if( ymax != 0 ) s[i][j]->SetMaximum(ymax);
 
+      if( i == 5 && j == 1){
+        h_signal = h_TT_Kappa_Hct_HtoAA[i][j];
+        h_background = h_Backgrounds; 
+      }
+
       TLegend * l;
 
-      if( i >= 3 ){
-        l = new TLegend(0.60,0.77,0.87,0.92);
+      if( i >= 4 ){
+        l = new TLegend(0.60,0.73,0.87,0.87);
         l->AddEntry(h_Backgrounds, "Backgrounds","F");
       }else{
-        l = new TLegend(0.65,0.57,0.87,0.92);
+        l = new TLegend(0.65,0.53,0.87,0.87);
         l->AddEntry(h_ZToLL[i][j], "Z #rightarrow ll","F");
         l->AddEntry(h_WToLNu[i][j], "W+jets","F");
         l->AddEntry(h_TTdilep_madspin[i][j], "t#bar{t} Dilep.","F");
@@ -381,13 +395,30 @@ void plot(){
         //cout << "WHToAA = " << h_WHToAA[i][j]->Integral() << endl;  
         //cout << "ZHToAA = " << h_ZHToAA[i][j]->Integral() << endl;  
         cout << "TT_Kappa_Hct_HtoAA = " << h_TT_Kappa_Hct_HtoAA[i][j]->Integral() << endl;
+        cout << "total background = " << total_bkg << endl;
         double eff = h_TT_Kappa_Hct_HtoAA[i][j]->Integral() /  h_TT_Kappa_Hct_HtoAA[0][j]->Integral() ;
         cout << "Signal Efficiency (%) = " << eff << endl ;  
         cout << "S/sqrt(S+B)= " << (sig)/sqrt(total_bkg+sig) << endl;
+        cout << "S/sqrt(S+B+(B*0.07)^2))= " << (sig)/sqrt(total_bkg+sig+total_bkg*total_bkg*0.07) << endl;
       }
 
-      c[i][j]->Print(Form("plots/V11/%s_%s.png", title.Data(), step.Data()));
-      c[i][j]->Print(Form("plots/V11/%s_%s.pdf", title.Data(), step.Data()));
+      //c[i][j]->Print(Form("plots/V10/%s_%s.png", title.Data(), step.Data()));
+      c[i][j]->Print(Form("plots/V10/%s_%s.pdf", step.Data(), title.Data()));
+      c[i][j]->Print(Form("plots/V10/%s_%s.C", step.Data(), title.Data()));
     }
   }
+
+  TFile* f = TFile::Open("outfile.root", "recreate");
+
+  h_signal->SetName("signal");
+  h_background->SetName("background");
+  h_signal->SetTitle("signal");
+  h_background->SetTitle("background");
+  h_signal->GetXaxis()->SetTitle("Diphoton Mass (GeV)");  
+  h_background->GetXaxis()->SetTitle("Diphoton Mass (GeV)");  
+
+  h_signal->Write();
+  h_background->Write();
+
+  f->Close();
 }
