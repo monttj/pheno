@@ -1,9 +1,11 @@
 #include "vector.h"
 
-void LeptonEnergy(const char *inputFile = "sourceFiles/LO/ttbar_LO_total.root")
-//void LeptonEnergy(const char *inputFile = "sourceFiles/LO/mt175/ttbar_LO_175.root")
+//void LeptonEnergy(const char *inputFile = "sourceFiles/LO/ttbar_LO_total.root")
+void LeptonEnergy(const TString & mass)
 {
-  gSystem->Load("libDelphes");
+
+  const char *inputFile = Form("sourceFiles/LO/ttbar_LO_%s.root",mass.Data());
+  gSystem->Load("/export/apps/delphes//libDelphes");
 
 /*
   TFile *f2 = TFile::Open("weightfunc2.root");
@@ -73,9 +75,8 @@ void LeptonEnergy(const char *inputFile = "sourceFiles/LO/ttbar_LO_total.root")
   TH1F * h_acc = (TH1F*) res->Get("h_totalacc_lepton"); 
 */
 
-  //TFile* f = TFile::Open("hist_LO_noleptoncut.root", "recreate");
-  TFile* f = TFile::Open("hist_LO_res_60.root", "recreate");
-  //TFile* f = TFile::Open("hist_NLO.root", "recreate");
+  //TFile* f = TFile::Open("hist_LO_res_60.root", "recreate");
+  TFile* f = TFile::Open(Form("hist_LO_%s.root",mass.Data()), "recreate");
 
   // Create chain of root trees
   TChain chain("Delphes");
@@ -214,6 +215,11 @@ void LeptonEnergy(const char *inputFile = "sourceFiles/LO/ttbar_LO_total.root")
               h_lepton_energy_acc->Fill( energy, genweight );
               nmuons++;
             }
+            //daughter1 = (GenParticle*) branchParticle->At( particle->D1);
+            //daughter2 = (GenParticle*) branchParticle->At( particle->D2);
+            //int d1_id = abs(daughter1->PID);
+            //int d2_id = abs(daughter2->PID);
+            //cout << "electron daughter  " << d1_id  << " , " << d2_id << endl;     
           }else if( abs(id) == 13 ){
             genmuon = particle;
             double energy = genmuon->E;
@@ -230,6 +236,17 @@ void LeptonEnergy(const char *inputFile = "sourceFiles/LO/ttbar_LO_total.root")
               h_lepton_energy_acc->Fill( energy, genweight );
               nelectrons++;
             }
+            //int d1_id = -1;
+            //int d2_id = -1;
+            //if( particle->D1 >= branchParticle->GetEntries()){
+            //  daughter1 = (GenParticle*) branchParticle->At( particle->D1);
+            //  int d1_id = abs(daughter1->PID);
+            //}
+            //if( particle->D1 >= branchParticle->GetEntries()){
+            //  daughter1 = (GenParticle*) branchParticle->At( particle->D1);
+            //  int d1_id = abs(daughter1->PID);
+            //}
+            //cout << "muon daughter  " << d1_id  << " , " << d2_id << endl;            
           }
         //NLO
         }else if( abs(id) == 6 ) {
