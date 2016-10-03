@@ -4,7 +4,7 @@
 void LeptonEnergy(const TString & mass)
 {
 
-  const char *inputFile = Form("sourceFiles/LO/ttbar_LO_%s.root",mass.Data());
+  const char *inputFile = Form("/home/tjkim/work/pheno/topmass/sourceFiles/LO/ttbar_LO_%s.root",mass.Data());
   gSystem->Load("/export/apps/delphes//libDelphes");
 
 /*
