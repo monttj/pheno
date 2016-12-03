@@ -1,10 +1,10 @@
 #include "vector.h"
 
 //void LeptonEnergy(const char *inputFile = "sourceFiles/LO/ttbar_LO_total.root")
-void LeptonEnergy(const TString & mass="173")
+void LeptonEnergy(const TString & file = "LO_167_sayaka_1")
 {
 
-  const char *inputFile = Form("/home/tjkim/work/pheno/topmass/sourceFiles/LO/ttbar_LO_%s.root",mass.Data());
+  const char *inputFile = Form("/home/tjkim/work/pheno/topmass/sourceFiles/LO/fromSayaka/ttbar_%s.root",file.Data());
   gSystem->Load("/export/apps/delphes//libDelphes");
 
 /*
@@ -76,7 +76,7 @@ void LeptonEnergy(const TString & mass="173")
 */
 
   //TFile* f = TFile::Open("hist_LO_res_60.root", "recreate");
-  TFile* f = TFile::Open(Form("hist_LO_%s_update.root",mass.Data()), "recreate");
+  TFile* f = TFile::Open(Form("hist_%s.root",file.Data()), "recreate");
 
   // Create chain of root trees
   TChain chain("Delphes");
@@ -463,7 +463,7 @@ void LeptonEnergy(const TString & mass="173")
     //Electron_E = -9.0;
     //Lepton_E_reco = -1.0;
     float Energy = 9.0;
-    if( passelectron && !passmuon && njets >= 3){
+    if( passelectron && !passmuon && njets >= 2){
       float myele_energy = myelectron->P4().E();
       //h_electron_energy_reco_S2->Fill(myele_energy, genweight);
       h_lepton_energy_reco_S2->Fill(myele_energy, genweight);
