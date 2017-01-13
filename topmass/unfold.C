@@ -114,7 +114,7 @@ void unfold(){
     }
   } 
 
-  TFile* f = TFile::Open("hist_LO_final_unfolded_mod_toy.root", "recreate");
+  TFile* f = TFile::Open("hist_LO_final_unfolded_mod.root", "recreate");
 
   TCanvas * c = new TCanvas("c","c",1);
   h_unfold_167->SetLineColor(kRed);
