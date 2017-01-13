@@ -42,18 +42,16 @@ gStyle.SetLabelSize(0.06, "XYZ")
 
 nlo = 0 
 
-def GetIntegral( energy_muon, gr, integral ):
+def GetIntegral( energy_lepton_unfolded, gr, integral ):
   tmp_integral = 0
   for nbin in range(1,nbins+1):
-     energy_bincenter = energy_muon.GetBinCenter(nbin)
-     energy_binconten = energy_muon.GetBinContent(nbin)
+     energy_bincenter = energy_lepton_unfolded.GetBinCenter(nbin)
+     energy_binconten = energy_lepton_unfolded.GetBinContent(nbin)
      weight_value = gr.Eval(energy_bincenter)
      tmp_integral = tmp_integral + weight_value*energy_binconten
   integral.append(tmp_integral)
 
 import re
-
-renbins = 20 
 
 mass = ""
 
@@ -62,121 +60,14 @@ if len(sys.argv) == 1:
 else:
   mass = sys.argv[1]
 
-#histfile = TFile("hist_LO_reco_v5_20GeV.root","read")
-#histfile = TFile("hist_LO_"+mass+".root","read")
-histfile = TFile("sayaka/sayaka_3jets1b/hist_LO_"+mass+"_sayaka_600K.root","read")
-#histfile = TFile("hist_LO_res_60.root","read")
+histfile = TFile("hist_LO_final_unfolded_mod.root","read")
 
-objectname = "lepton"
-gen_histogram_name = "h_"+objectname+"_energy"
-reco_histogram_name = "h_"+objectname+"_energy_reco" 
-energy_muon = histfile.Get( reco_histogram_name )
-energy_muon_gen = histfile.Get( gen_histogram_name )
-energy_muon.Rebin( renbins )
-energy_muon_gen.Rebin( renbins )
+histogram_name = "h_unfold_"+mass
+energy_lepton_unfolded = histfile.Get( histogram_name )
 
-#c_reco_muon = TCanvas("c_reco_muon","c_reco_muon",1)
-energy_muon_reco = energy_muon.Clone("energy_muon_reco") 
-#energy_muon_reco.Draw()
-energy_muon_reco.SetFillColor(2)
-energy_muon_reco.SetLineColor(2)
-energy_muon_reco.GetXaxis().SetTitle("Energy (GeV)")
-#c_reco_muon.Print("energy_reco_"+objectname+".pdf")
-
-renbins_acc = renbins 
-#resfile = TFile("hist_LO_res_v5_20GeV.root","read")
-#resfile = TFile("histFiles/hist_LO_res_60.root","read")
-resfile = TFile("sayaka/sayaka_3jets1b/hist_LO_173_sayaka_1200K_merged.root","read")
-#resfile = TFile("sayaka/hist_LO_170_sayaka.root","read")
-#resfile = TFile("sayaka/hist_LO_"+mass+"_sayaka.root","read")
-res_gen = resfile.Get( gen_histogram_name )
-res_reco = resfile.Get( reco_histogram_name )
-res_gen.Scale(0.5)
-res_reco.Scale(0.5)
-res_gen_origin = res_gen.Clone("res_gen_origin")
-res_gen_origin.Rebin( renbins )
-res_gen.Rebin( renbins_acc )
-res_reco.Rebin( renbins_acc )
-
-h_acc = res_gen.Clone("h_acc")
-
-tmpn = h_acc.GetNbinsX()
-
-for i in range(0, h_acc.GetNbinsX()):
-  y_gen = res_gen.GetBinContent(i+1)
-  y_reco = res_reco.GetBinContent(i+1)
-  if i+1 <= 200/renbins_acc:
-    h_acc.SetBinContent(i+1, 0)
-  else:
-    acc = 0
-    if y_reco > 0:
-      acc = y_reco / y_gen
-    else:
-      print "zero reco"
-    h_acc.SetBinContent(i+1, acc)
-
-#f5 = TF1("f5","[0]+[1]*x+[2]*x*x+[3]*x*x*x+[4]*x*x*x*x+[5]*x*x*x*x*x+[6]*x*x*x*x*x*x",20,500);
-#h_acc.Fit("f5","R")
-
-for i in range(0,energy_muon.GetNbinsX()):
-  y = energy_muon.GetBinContent(i+1)
-  y_gen = res_gen_origin.GetBinContent(i+1)
-  if i+1 <= 200/renbins:
-    energy_muon.SetBinContent(i+1, y_gen)
-  else:
-    val = energy_muon.GetBinLowEdge(i+1)+energy_muon.GetBinWidth(i+1)/2.0
-    #corr = 1.0/h_acc.GetBinContent(i+1)
-    corr = 1.0/h_acc.Interpolate(val)
-    #corr = 1.0/f5.Eval(val)
-    energy_muon.SetBinContent(i+1, y*corr)
-
-
-c_acceptance = TCanvas("c_acceptance","c_acceptance",1)
-h_acc.Draw()
-h_acc.GetXaxis().SetTitle("Lepton Energy (GeV)")
-h_acc.SetTitle("Acceptance (reco/gen)")
-c_acceptance.Print("acceptance_"+objectname+".pdf")
-
-c_energy = TCanvas("c_energy","c_energy",1)
-energy_muon.Draw()
-energy_muon.SetStats(0)
-#energy_muon.SetMarkerStyle(20)
-#energy_muon.SetMarkerSize(0.5)
-energy_muon.SetFillColor(4)
-energy_muon.SetFillStyle(3004)
-energy_muon.GetXaxis().SetTitle("Lepton Energy (GeV)")
-energy_muon.GetXaxis().SetTitleSize(0.06)
-energy_muon.GetYaxis().SetTitleSize(0.06)
-energy_muon.GetXaxis().SetLabelSize(0.04)
-energy_muon.GetYaxis().SetLabelSize(0.04)
-energy_muon.GetYaxis().SetTitle("Entries")
-gStyle.SetTitleYOffset(1.9)
-
-energy_muon.GetYaxis().SetDecimals(1)
-#energy_muon.SetMaximum(55000)
-
-energy_muon.SetTitle("")
-energy_muon_reco.Draw("same")
-
-#a2 =TGaxis(0,0,0,55000,"energy_muon",505,"G")
-#a2.Draw("same")
-
-l = TLegend(0.6,0.65,0.8,0.8)
-l.AddEntry(energy_muon,"Unfolded","F")
-l.AddEntry(energy_muon_reco,"Reco.","F")
-l.SetTextSize(0.05);
-l.SetLineColor(0);
-l.SetFillColor(0);
-l.Draw()
-
-if nlo :
-  c_energy.Print("energy_NLO_"+objectname+"_"+mass+".pdf")
-else :
-  c_energy.Print("energy_LO_"+objectname+"_"+mass+".pdf")
-
-nevents = energy_muon.Integral()
-energy_muon.Scale(1.0/float(nevents))
-nbins = energy_muon.GetNbinsX()
+nevents = energy_lepton_unfolded.Integral()
+energy_lepton_unfolded.Scale(1.0/float(nevents))
+nbins = energy_lepton_unfolded.GetNbinsX()
 
 files = []
 
@@ -213,16 +104,16 @@ for f in files:
     gr = key.ReadObj();
     if nfile == 0:
       mymass2.append(float(gr.GetName()))
-      GetIntegral( energy_muon, gr, integral2)
+      GetIntegral( energy_lepton_unfolded, gr, integral2)
     elif nfile == 1:
       mymass3.append(float(gr.GetName()))
-      GetIntegral( energy_muon, gr, integral3) 
+      GetIntegral( energy_lepton_unfolded, gr, integral3) 
     elif nfile == 2:
       mymass5.append(float(gr.GetName()))
-      GetIntegral( energy_muon, gr, integral5)
+      GetIntegral( energy_lepton_unfolded, gr, integral5)
     elif nfile == 3:
       mymass15.append(float(gr.GetName()))
-      GetIntegral( energy_muon, gr, integral15)
+      GetIntegral( energy_lepton_unfolded, gr, integral15)
     key = iter.Next()
   nfile = nfile + 1
 
@@ -309,6 +200,6 @@ l.SetFillColor(0);
 l.Draw()
 
 if nlo :
-  wlepton.Print("integralmass_NLO_"+objectname+"_"+mass+".pdf")
+  wlepton.Print("integralmass_NLO_lepton_"+mass+".pdf")
 else :
-  wlepton.Print("integralmass_LO_"+objectname+"_"+mass+".pdf")
+  wlepton.Print("integralmass_LO_lepton_"+mass+".pdf")
