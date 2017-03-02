@@ -4,11 +4,11 @@ void unfold(){
 
   bool scalestudy = false;
 
-  TFile * f_167 = new TFile("sayaka/pt/hist_LO_167_sayaka_600K_3.root","read");
-  TFile * f_170 = new TFile("sayaka/pt/hist_LO_170_sayaka_600K_3.root","read");
-  TFile * f_173 = new TFile("sayaka/pt/hist_LO_173_sayaka_600K_3.root","read");
-  TFile * f_176 = new TFile("sayaka/pt/hist_LO_176_sayaka_600K_3.root","read");
-  TFile * f_179 = new TFile("sayaka/pt/hist_LO_179_sayaka_600K_3.root","read");
+  TFile * f_167 = new TFile("sayaka/energy/hist_LO_167_sayaka_600K_3.root","read");
+  TFile * f_170 = new TFile("sayaka/energy/hist_LO_170_sayaka_600K_3.root","read");
+  TFile * f_173 = new TFile("sayaka/energy/hist_LO_173_sayaka_600K_3.root","read");
+  TFile * f_176 = new TFile("sayaka/energy/hist_LO_176_sayaka_600K_3.root","read");
+  TFile * f_179 = new TFile("sayaka/energy/hist_LO_179_sayaka_600K_3.root","read");
 
   TH1F * h_mea_S1_167 = (TH1F *) f_167->Get("h_lepton_energy_reco");
   TH1F * h_mea_S1_170 = (TH1F *) f_170->Get("h_lepton_energy_reco");
@@ -36,9 +36,9 @@ void unfold(){
 
   if( scalestudy ) {
 
-    TFile * f_scaleup = new TFile("sayaka/pt/q2scale/hist_LO_173_sayaka_scale20.root","read");
-    TFile * f_scalect = new TFile("sayaka/pt/q2scale/hist_LO_173_sayaka_scale10.root","read");
-    TFile * f_scaledw = new TFile("sayaka/pt/q2scale/hist_LO_173_sayaka_scale05.root","read");
+    TFile * f_scaleup = new TFile("sayaka/energy/q2scale/hist_LO_173_sayaka_scale20.root","read");
+    TFile * f_scalect = new TFile("sayaka/energy/q2scale/hist_LO_173_sayaka_scale10.root","read");
+    TFile * f_scaledw = new TFile("sayaka/energy/q2scale/hist_LO_173_sayaka_scale05.root","read");
 
     TH1F * h_mea_S1_scaleup = (TH1F *) f_scaleup->Get("h_lepton_energy_reco");
     TH1F * h_mea_S1_scalect = (TH1F *) f_scalect->Get("h_lepton_energy_reco");
@@ -55,11 +55,11 @@ void unfold(){
   }
   
 
-  TFile * f_response_167 = new TFile("sayaka/pt/hist_LO_167_sayaka_1200K.root","read");
-  TFile * f_response_170 = new TFile("sayaka/pt/hist_LO_170_sayaka_1200K.root","read");
-  TFile * f_response_173 = new TFile("sayaka/pt/hist_LO_173_sayaka_1200K.root","read");
-  TFile * f_response_176 = new TFile("sayaka/pt/hist_LO_176_sayaka_1200K.root","read");
-  TFile * f_response_179 = new TFile("sayaka/pt/hist_LO_179_sayaka_1200K.root","read");
+  TFile * f_response_167 = new TFile("sayaka/energy/hist_LO_167_sayaka_1200K.root","read");
+  TFile * f_response_170 = new TFile("sayaka/energy/hist_LO_170_sayaka_1200K.root","read");
+  TFile * f_response_173 = new TFile("sayaka/energy/hist_LO_173_sayaka_1200K.root","read");
+  TFile * f_response_176 = new TFile("sayaka/energy/hist_LO_176_sayaka_1200K.root","read");
+  TFile * f_response_179 = new TFile("sayaka/energy/hist_LO_179_sayaka_1200K.root","read");
 
   TH1F * h_res_mea_S1_167 = (TH1F *) f_response_167->Get("h_lepton_energy_reco");
   TH1F * h_res_mea_S1_170 = (TH1F *) f_response_170->Get("h_lepton_energy_reco");
@@ -192,7 +192,7 @@ void unfold(){
   TH1F* h_gen_full_scaled = (TH1F*) h_gen_full->Clone("h_gen_full_scaled");
   h_gen_full_scaled->Scale(0.5);
   for(int i = 1; i <= nbins; i++){
-    if( i <= 10){
+    if( i <= 15){
       h_unfold_167->SetBinContent(i,h_gen_full_scaled->GetBinContent(i));
       h_unfold_170->SetBinContent(i,h_gen_full_scaled->GetBinContent(i));
       h_unfold_173->SetBinContent(i,h_gen_full_scaled->GetBinContent(i));
@@ -264,7 +264,7 @@ void unfold(){
   }
 
 
-  TFile* f = TFile::Open("hist_LO_final_unfolded_mod.root", "recreate");
+  TFile* f = TFile::Open("hist_LO_final_unfolded_mod_30.root", "recreate");
 
   TCanvas * c = new TCanvas("c","c",1);
   h_unfold_167->SetLineColor(kRed);
