@@ -1,12 +1,11 @@
-#include "vector.h"
-
 //void LeptonEnergy(const char *inputFile = "sourceFiles/LO/ttbar_LO_total.root")
-void LeptonEnergy(const TString & file = "LO_167_sayaka_1")
+void LeptonEnergy(const TString & file)
 {
 
-  const char *inputFile = Form("/home/tjkim/work/pheno/topmass/sourceFiles/LO/fromSayaka/ttbar_%s.root",file.Data());
-  gSystem->Load("/export/apps/delphes//libDelphes");
-
+  //const char *inputFile = Form("/home/tjkim/work/pheno/topmass/sourceFiles/LO/fromSayaka/ttbar_%s.root",file.Data());
+  //gSystem->Load("/export/apps/delphes//libDelphes");
+  const char *inputFile = Form("/data/users/seohyun/analysis/ttbar_%s.root",file.Data());
+  gSystem->Load("/home/seohyun/delphes/libDelphes.so");
 /*
   TFile *f2 = TFile::Open("weightfunc2.root");
   TFile *f3 = TFile::Open("weightfunc3.root");
@@ -76,7 +75,7 @@ void LeptonEnergy(const TString & file = "LO_167_sayaka_1")
 */
 
   //TFile* f = TFile::Open("hist_LO_res_60.root", "recreate");
-  TFile* f = TFile::Open(Form("hist_%s.root",file.Data()), "recreate");
+  TFile* f = TFile::Open(Form("170717/hist_%s.root",file.Data()), "recreate");
 
   // Create chain of root trees
   TChain chain("Delphes");
@@ -466,12 +465,12 @@ void LeptonEnergy(const TString & file = "LO_167_sayaka_1")
     //Electron_E = -9.0;
     //Lepton_E_reco = -1.0;
     float Energy = 9.0;
-    if( passelectron && !passmuon && njets >= 3){
+    if( passelectron && !passmuon && njets >= 4){
       float myele_energy = myelectron->P4().E();
       //h_electron_energy_reco_S2->Fill(myele_energy, genweight);
       //h_lepton_energy_reco_S2->Fill(myele_energy, genweight);
       //h_lepton_nbjets_reco_S2->Fill(nbjets);
-      if( nbjets > 0 ){
+      if( nbjets >= 2 ){
         //h_electron_energy_reco_final->Fill(myele_energy, genweight);
         h_lepton_energy_reco_final->Fill(myele_energy, genweight);
         h2_lepton_energy_final_response->Fill(myele_energy, genelectron->E, genweight);
@@ -486,12 +485,12 @@ void LeptonEnergy(const TString & file = "LO_167_sayaka_1")
       //Lepton_E_reco = myele_energy;
     }
 
-    if( passmuon && !passelectron && njets >= 3){
+    if( passmuon && !passelectron && njets >= 4){
       float mymuon_energy = mymuon->P4().E();
       //h_muon_energy_reco_S2->Fill(mymuon_energy, genweight);
       //h_lepton_energy_reco_S2->Fill(mymuon_energy, genweight);
       //h_lepton_nbjets_reco_S2->Fill(nbjets);
-      if( nbjets > 0 ){
+      if( nbjets >= 2  ){
       //  h_muon_energy_reco_final->Fill(mymuon_energy, genweight);
         h_lepton_energy_reco_final->Fill(mymuon_energy, genweight);
         h2_lepton_energy_final_response->Fill(mymuon_energy, genmuon->E, genweight);
