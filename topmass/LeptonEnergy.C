@@ -412,16 +412,17 @@ void LeptonEnergy(const TString & file)
 
     if(branchMuon->GetEntries() > 0)
     {
-
+      bool mymuonpass = false;
       for(int i = 0; i < branchMuon->GetEntriesFast() ; i++){ 
         Muon * muon =  (Muon *) branchMuon->At(i);
         if( muon->P4().E() > 20 && fabs( muon->P4().Eta() < 2.4) ){
           mymuon = muon;
+          mymuonpass = true;
         }
         break;
       }
      
-      if( mymuon && ( nmuons > 0 || nelectrons > 0 ) ){ 
+      if( mymuonpass && ( nmuons > 0 || nelectrons > 0 ) ){ 
         //h_muon_energy_reco->Fill(mymuon->P4().E(), genweight);
         h_lepton_energy_reco->Fill(mymuon->P4().E(), genweight);
         h2_lepton_energy_response->Fill(mymuon->P4().E(), genmuon->E, genweight);
@@ -433,14 +434,16 @@ void LeptonEnergy(const TString & file)
     
     if(branchElectron->GetEntries() > 0)
     {
+      bool myelectronpass = false;
       for(int i = 0; i < branchElectron->GetEntriesFast() ; i++){
         Electron * electron =  (Electron *) branchElectron->At(i);
         if( electron->P4().E() > 20 && fabs( electron->P4().Eta() < 2.4) ){
           myelectron = electron;
+          myelectronpass = true;
         }
         break;
       }
-      if( myelectron && ( nmuons > 0 || nelectrons > 0 ) ){
+      if( myelectronpass && ( nmuons > 0 || nelectrons > 0 ) ){
         //h_electron_energy_reco->Fill(myelectron->P4().E(), genweight);
         h_lepton_energy_reco->Fill(myelectron->P4().E(), genweight);
         h2_lepton_energy_response->Fill(myelectron->P4().E(), genelectron->E, genweight);
