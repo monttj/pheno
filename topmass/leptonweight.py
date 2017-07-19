@@ -29,7 +29,7 @@ if len(sys.argv) == 1:
 else:
   mass = sys.argv[1]
 
-histfile = TFile("hist_LO_final_unfolded_mod.root","read")
+histfile = TFile("hist_LO_final_unfolded_random_v3.root","read")
 
 histogram_name = "h_unfold_"+mass
 energy_lepton_unfolded = histfile.Get( histogram_name )
@@ -112,8 +112,8 @@ for i in range(0,nmymass):
   final5_inv.SetPoint(i, integral5[i], mymass5[i])
   final15_inv.SetPoint(i, integral15[i], mymass15[i])
 
-final2.GetXaxis().SetTitle("m_{t} (GeV)")
-final15.GetXaxis().SetTitle("m_{t} (GeV)")
+final2.GetXaxis().SetTitle("m (GeV)")
+final15.GetXaxis().SetTitle("m (GeV)")
 final2.SetLineColor(ROOT.kGreen)
 final3.SetLineColor(ROOT.kBlue)
 final5.SetLineColor(ROOT.kRed)
@@ -172,5 +172,7 @@ l.Draw()
 
 if nlo :
   wlepton.Print("integralmass_NLO_lepton_"+mass+".pdf")
+  wlepton.Print("integralmass_NLO_lepton_"+mass+".C")
 else :
   wlepton.Print("integralmass_LO_lepton_"+mass+".pdf")
+  wlepton.Print("integralmass_LO_lepton_"+mass+".C")
