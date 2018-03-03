@@ -726,6 +726,7 @@ bool AnalysisHelper::isFakeElectron(const RecJetFormat* jet)
     return isFake;
 }
 
+/*
 std::vector<const RecLeptonFormat*> AnalysisHelper::FakeElectrons(std::vector<const RecJetFormat*>& jets, bool removeJets, double PTmin, double ETAmax)
 {
   // collection of fake electrons
@@ -813,3 +814,4 @@ void AnalysisHelper::FakeElectrons(const EventFormat& event, std::vector<const R
   // sort leptons according to their pt
   sort(leptons.begin(),leptons.end(),SortLeptonPt);
 }
+*/

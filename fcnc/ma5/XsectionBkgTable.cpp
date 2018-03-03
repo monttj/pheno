@@ -96,7 +96,7 @@ bool XsectionBkgExtractor::Initialize()
   // Jet multiplicity fraction computed by MG LO.
   xsection=4925*1.27*pb;
   Insert("ZToLL50-0Jet",0.8115221349*xsection);
-  Insert("ZToLL50-0Jet",0.8115221349*xsection*6.21934589957e-05);
+//  Insert("ZToLL50-0Jet",0.8115221349*xsection*6.21934589957e-05);
   //  Insert("ZToLL50-0Jet_sm-no_masses",0.707*xsection);
   Insert("ZToLL50-1Jet",0.1364265922*xsection);
   //  Insert("ZToLL50-1Jet_sm-no_masses",0.188*xsection);
@@ -212,11 +212,11 @@ bool XsectionBkgExtractor::Initialize()
   // E17: AA+jets
   // Total LO cross section with MG_aMC@NLO : 72.91 pb
   // K-factor calculated with MG_aMC@NLO : 214.8/77.1 = 2.79
-  xsection=2.031e2*pb;
-  Insert("AA-0Jet",0.55534*xsection);
-  Insert("AA-1Jet",0.25410*xsection);
-  Insert("AA-2Jet",0.12886*xsection);
-  Insert("AA-3Jet",0.06170*xsection);
+  //xsection=2.031e2*pb;
+  //Insert("AA-0Jet",0.55534*xsection);
+  //Insert("AA-1Jet",0.25410*xsection);
+  //Insert("AA-2Jet",0.12886*xsection);
+  //Insert("AA-3Jet",0.06170*xsection);
 
   // ----------- triboson (E17) --------------------------------------------------
   // Reference: aMC@NLO (arXiv:1405.0301)
