@@ -1,5 +1,5 @@
 /*
-root -l -b -q AddbJets.C'("step_1.root", "step_1_plots.root")'
+root -l -b -q ana.C'("step_1.root", "step_1_plots.root")'
 */
 
 //------------------------------------------------------------------------------
