@@ -221,6 +221,16 @@ void ana(const char *inputFile, const char *outputFile)
  TFile *fout = TFile::Open(outputFile,"RECREATE");
  fout->cd();
 
+ double dnn_signal;
+ double dnn_bjet1_pt;
+ double dnn_bjet1_eta;
+ double dnn_bjet1_e;
+ double dnn_bjet2_pt;
+ double dnn_bjet2_eta;
+ double dnn_bjet2_e;
+ double dnn_dR;
+ double dnn_M;
+
  double bjet1_pt;
  double bjet1_eta;
  double bjet1_phi;
@@ -240,6 +250,18 @@ void ana(const char *inputFile, const char *outputFile)
  float Electron2_pt, Electron2_eta, Electron2_phi;
  float Muon1_pt, Muon1_eta, Muon1_phi;
  float Muon2_pt, Muon2_eta, Muon2_phi;
+
+ //Tree for Deep learning input 
+ TTree * dnn_tree = new TTree( "dnn_input", "tree for dnn");
+ dnn_tree->Branch("dnn_signal",&dnn_signal,"dnn_signal/d");
+ dnn_tree->Branch("dnn_bjet1_pt",&dnn_bjet1_pt,"dnn_bjet1_pt/d");
+ dnn_tree->Branch("dnn_bjet1_eta",&dnn_bjet1_eta,"dnn_bjet1_eta/d");
+ dnn_tree->Branch("dnn_bjet1_e",&dnn_bjet1_e,"dnn_bjet1_e/d");
+ dnn_tree->Branch("dnn_bjet2_pt",&dnn_bjet2_pt,"dnn_bjet2_pt/d");
+ dnn_tree->Branch("dnn_bjet2_eta",&dnn_bjet2_eta,"dnn_bjet2_eta/d");
+ dnn_tree->Branch("dnn_bjet2_e",&dnn_bjet2_e,"dnn_bjet2_e/d");
+ dnn_tree->Branch("dnn_dR",&dnn_dR,"dnn_dR/d");
+ dnn_tree->Branch("dnn_M",&dnn_M,"dnn_M/d");
 
  //Tree
  TTree * tree = new TTree( "tree", "tree for ttbb");
@@ -333,7 +355,17 @@ void ana(const char *inputFile, const char *outputFile)
    Electrons.clear();
    Muons.clear(); 
    bJets.clear();
-   
+  
+   dnn_signal = 999;
+   dnn_bjet1_pt = 999;
+   dnn_bjet1_eta = 999;
+   dnn_bjet1_e = 999;
+   dnn_bjet2_pt = 999;
+   dnn_bjet2_eta = 999;
+   dnn_bjet2_e = 999;
+   dnn_dR = 999;
+   dnn_M = 999;
+
    Jet_pt = 999;
    Jet_eta = 999;
    Jet_phi = 999;
@@ -545,6 +577,22 @@ void ana(const char *inputFile, const char *outputFile)
           RecoAddJets[0] = p4[0];
           RecoAddJets[1] = p4[1];
        }
+ 
+       bool p4_1_matched = std::find(matchedbjets.begin(), matchedbjets.end(), bJets[b1]) != matchedbjets.end(); 
+       bool p4_2_matched = std::find(matchedbjets.begin(), matchedbjets.end(), bJets[b2]) != matchedbjets.end(); 
+       bool signal = p4_1_matched && p4_2_matched;
+
+       if (signal) dnn_signal = 1;
+       else dnn_signal = 0;
+       dnn_bjet1_pt = p4[0].Pt();
+       dnn_bjet1_eta = p4[0].Eta();
+       dnn_bjet1_e = p4[0].E();
+       dnn_bjet2_pt = p4[1].Pt();
+       dnn_bjet2_eta = p4[1].Eta();
+       dnn_bjet2_e = p4[1].E();
+       dnn_dR = tmp_dRbb;
+       dnn_M = tmp_mbb;
+       dnn_tree->Fill();
      }
    }
 
