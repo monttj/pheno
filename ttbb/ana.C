@@ -289,21 +289,21 @@ void ana(const char *inputFile, const char *outputFile)
  TClonesArray *branchMuon = treeReader->UseBranch("Muon");
 
  // Book histograms
- TH1 *histnjet = new TH1F("njet", "Number of jets", 14, 0.0, 14.0);
- TH1 *histnelectron = new TH1F("nelectron", "Number of electrons", 3, 0.0, 3.0);
- TH1 *histnmuon = new TH1F("nmuon", "Number of muons", 3, 0.0, 3.0);
+ TH1 *histnjet = new TH1F("h_njet", "Number of jets", 14, 0.0, 14.0);
+ TH1 *histnElectron = new TH1F("h_nElectron", "Number of electrons", 3, 0.0, 3.0);
+ TH1 *histnMuon = new TH1F("h_nMuon", "Number of muons", 3, 0.0, 3.0);
  
- TH1 *histnbjet = new TH1F("nbjet", "Number of b-jets", 10, 0.0, 10.0);
- TH1 *histMbb = new TH1F("mbb", "M_{inv}(b, b)", 40, 20.0, 180.0);
- TH1 *histdRbb = new TH1F("dRbb", "dR(b, b)", 40, 0, 4.0);
+ TH1 *histnbjet = new TH1F("h_nbjet", "Number of b-jets", 10, 0.0, 10.0);
+ TH1 *histMbb = new TH1F("h_mbb", "M_{inv}(b, b)", 40, 20.0, 180.0);
+ TH1 *histdRbb = new TH1F("h_dRbb", "dR(b, b)", 40, 0, 4.0);
 
- TH1 *hist_gennbjet = new TH1F("gennbjet", "Number of b-jets", 6, 0.0, 6.0);
- TH1 *hist_genMbb = new TH1F("genmbb", "M_{inv}(b, b)", 40, 20.0, 180.0);
- TH1 *hist_gendRbb = new TH1F("gendRbb", "dR(b, b)", 40, 0, 4.0);
+ TH1 *hist_gennbjet = new TH1F("h_gennbjet", "Number of b-jets", 6, 0.0, 6.0);
+ TH1 *hist_genMbb = new TH1F("h_genmbb", "M_{inv}(b, b)", 40, 20.0, 180.0);
+ TH1 *hist_gendRbb = new TH1F("h_gendRbb", "dR(b, b)", 40, 0, 4.0);
 
- TH1 *hist_matchednbjet = new TH1F("matchednbjet", "Number of b-jets", 6, 0.0, 6.0);
- TH1 *hist_matchedMbb = new TH1F("matchedmbb", "M_{inv}(b, b)", 40, 20.0, 180.0);
- TH1 *hist_matcheddRbb = new TH1F("matcheddRbb", "dR(b, b)", 40, 0, 4.0);
+ TH1 *hist_matchednbjet = new TH1F("h_matchednbjet", "Number of b-jets", 6, 0.0, 6.0);
+ TH1 *hist_matchedMbb = new TH1F("h_matchedmbb", "M_{inv}(b, b)", 40, 20.0, 180.0);
+ TH1 *hist_matcheddRbb = new TH1F("h_matcheddRbb", "dR(b, b)", 40, 0, 4.0);
 
  Int_t numberOfSelectedEvents = 0;
  Int_t numberOfMatchedEvents = 0;
@@ -318,7 +318,7 @@ void ana(const char *inputFile, const char *outputFile)
  Electron *electron;
  Muon *muon;
 
- int entry, i, njet, nbjet, nelectron, nmuon;
+ int entry, i, njet, nbjet;
  bool pass = false;
 
  // Loop over all events
@@ -380,32 +380,32 @@ void ana(const char *inputFile, const char *outputFile)
      }
    }
    //Electron cut
-   nelectron = 0;
+   nElectron = 0;
    for(i = 0; i < branchElectron->GetEntries(); ++i){
      electron = (Electron*) branchElectron->At(i);
      if( (electron->PT > 30) & (fabs(electron->Eta) < 2.5)){
-       nelectron++;
+       nElectron++;
        Electrons.push_back(electron);
      }
    }
    //Muon cut
-   nmuon = 0;
+   nMuon = 0;
    for(i = 0; i < branchMuon->GetEntries(); ++i){
      muon = (Muon*) branchMuon->At(i);
      if( (muon->PT > 30) & (fabs(muon->Eta) < 2.5) ){
-       nmuon++;
+       nMuon++;
        Muons.push_back(muon);
      }
    }
 
    // Dilepton channel cuts
    if(isdilepton) {
-     pass = ((nelectron >= 2) || (nmuon >= 2) || (nelectron >= 1 & nmuon >= 1)) & (njet >= 2) & (nbjet >= 2);
+     pass = ((nElectron >= 2) || (nMuon >= 2) || (nElectron >= 1 & nMuon >= 1)) & (njet >= 2) & (nbjet >= 2);
      //cout<<"dicut"<<endl;
    }
    // Single lepton channel cuts
    else{
-     pass = (nelectron == 1 || nmuon == 1) & (njet >= 4) & (nbjet >= 2);
+     pass = (nElectron == 1 || nMuon == 1) & (njet >= 4) & (nbjet >= 2);
      //cout<<"singlecut"<<endl;
    }
 
@@ -415,23 +415,23 @@ void ana(const char *inputFile, const char *outputFile)
    Jet_pt = Jets[0]->PT;
    Jet_eta = Jets[0]->Eta;
    Jet_phi = Jets[0]->Phi;
-   if( nelectron == 1){
+   if( nElectron == 1){
      Electron1_pt = Electrons[0]->PT;
      Electron1_eta = Electrons[0]->Eta;
      Electron1_phi = Electrons[0]->Phi;
    }
-   if( nmuon ==1 ){
+   if( nMuon ==1 ){
      Muon1_pt = Muons[0]->PT;
      Muon1_eta = Muons[0]->Eta;
      Muon1_phi = Muons[0]->Phi;
    }
    if(isdilepton){
-     if(nelectron == 2){
+     if(nElectron == 2){
        Electron2_pt = Electrons[1]->PT;
        Electron2_eta = Electrons[1]->Eta;
        Electron2_phi = Electrons[1]->Phi;
      }
-     if(nmuon == 2){
+     if(nMuon == 2){
        Muon2_pt = Muons[1]->PT;
        Muon2_eta = Muons[1]->Eta;
        Muon2_phi = Muons[1]->Phi;
@@ -439,12 +439,10 @@ void ana(const char *inputFile, const char *outputFile)
    }
    nJet = njet;
    nbJet = nbjet;
-   nElectron = nelectron;
-   nMuon = nmuon;
 
    histnjet->Fill( njet );
-   histnelectron->Fill( nelectron );
-   histnmuon->Fill( nmuon );
+   histnElectron->Fill( nElectron );
+   histnMuon->Fill( nMuon );
 
    TLorentzVector addbjets[2]; 
    int nb = 0;
@@ -491,7 +489,7 @@ void ana(const char *inputFile, const char *outputFile)
        TLorentzVector genbjet = GenAddbJets[j]->P4();
        double dR = recobjet.DeltaR( genbjet );
        //cout << "test dR = " << dR << endl;
-       if( dR < 0.4 ) matchedbjets.push_back( jet ) ;
+       if( dR < 0.4 ) matchedbjets.push_back( bJets[i] ) ;
      }
    }
 
@@ -533,7 +531,7 @@ void ana(const char *inputFile, const char *outputFile)
    float dRbb = 999;
 
    // select two bjets with minimum dR
-   TLorentzVector matchedRecoJets[2];
+   TLorentzVector RecoAddJets[2];
    for(int b1 = 0; b1 < bJets.size()-1; b1++){
      for(int b2 = b1+1; b2 < bJets.size(); b2++){
        p4[0] = bJets[b1]->P4();
@@ -544,8 +542,8 @@ void ana(const char *inputFile, const char *outputFile)
        if(tmp_dRbb < dRbb) {
           dRbb = tmp_dRbb;
           mbb = tmp_mbb; 
-          matchedRecoJets[0] = p4[0];
-          matchedRecoJets[1] = p4[1];
+          RecoAddJets[0] = p4[0];
+          RecoAddJets[1] = p4[1];
        }
      }
    }
@@ -554,12 +552,12 @@ void ana(const char *inputFile, const char *outputFile)
    bool matched1 = false;
    bool matched2 = false;
    for(int j = 0 ; j < GenAddbJets.size(); j++){
-     if( matchedRecoJets[0].DeltaR( GenAddbJets[j]->P4() ) < 0.5 )  matched1 = true;
-     if( matchedRecoJets[1].DeltaR( GenAddbJets[j]->P4() ) < 0.5 )  matched2 = true;
+     if( RecoAddJets[0].DeltaR( GenAddbJets[j]->P4() ) < 0.5 )  matched1 = true;
+     if( RecoAddJets[1].DeltaR( GenAddbJets[j]->P4() ) < 0.5 )  matched2 = true;
     }
    if( matched1 && matched2 ) matched = true;
 
-   cout<<"nelectron = "<< nelectron <<" nmuon = "<< nmuon <<" njet = "<< njet <<" nbjet = "<< nbjet << endl;
+   cout<<"nElectron = "<< nElectron <<" nMuon = "<< nMuon <<" njet = "<< njet <<" nbjet = "<< nbjet << endl;
 
    ++numberOfSelectedEvents;
   if(matched) numberOfMatchedEvents++;
