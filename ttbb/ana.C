@@ -245,11 +245,11 @@ void ana(const char *inputFile, const char *outputFile)
  double bjet3_e;
 
  unsigned short nJet, nbJet, nMuon, nElectron;
- float Jet_pt, Jet_eta, Jet_phi;
- float Electron1_pt, Electron1_eta, Electron1_phi;
- float Electron2_pt, Electron2_eta, Electron2_phi;
- float Muon1_pt, Muon1_eta, Muon1_phi;
- float Muon2_pt, Muon2_eta, Muon2_phi;
+ double Jet_pt, Jet_eta, Jet_phi, Jet_e;
+ double Electron1_pt, Electron1_eta, Electron1_phi, Electron1_e;
+ double Electron2_pt, Electron2_eta, Electron2_phi, Electron2_e;
+ double Muon1_pt, Muon1_eta, Muon1_phi, Muon1_e;
+ double Muon2_pt, Muon2_eta, Muon2_phi, Muon2_e;
 
  //Tree for Deep learning input 
  TTree * dnn_tree = new TTree( "dnn_input", "tree for dnn");
@@ -280,25 +280,30 @@ void ana(const char *inputFile, const char *outputFile)
  tree->Branch("bjet3_e",&bjet3_e,"bjet3_e/d");
 
  tree->Branch("nJet",&nJet,"nJet/s");
- tree->Branch("Jet_pt",&Jet_pt,"Jet_pt/f");
- tree->Branch("Jet_eta",&Jet_eta,"Jet_eta/f");
- tree->Branch("Jet_phi",&Jet_phi,"Jet_phi/f");
+ tree->Branch("Jet_pt",&Jet_pt,"Jet_pt/d");
+ tree->Branch("Jet_eta",&Jet_eta,"Jet_eta/d");
+ tree->Branch("Jet_phi",&Jet_phi,"Jet_phi/d");
+ tree->Branch("Jet_e",&Jet_e,"Jet_e/d");
 
  tree->Branch("nElectron",&nElectron,"nElectron/s");
- tree->Branch("Electron1_pt",&Electron1_pt,"Electron1_pt/f");
- tree->Branch("Electron1_eta",&Electron1_eta,"Electron1_eta/f");
- tree->Branch("Electron1_phi",&Electron1_phi,"Electron1_phi/f");
- tree->Branch("Electron2_pt",&Electron2_pt,"Electron2_pt/f");
- tree->Branch("Electron2_eta",&Electron2_eta,"Electron2_eta/f");
- tree->Branch("Electron2_phi",&Electron2_phi,"Electron2_phi/f");
+ tree->Branch("Electron1_pt",&Electron1_pt,"Electron1_pt/d");
+ tree->Branch("Electron1_eta",&Electron1_eta,"Electron1_eta/d");
+ tree->Branch("Electron1_phi",&Electron1_phi,"Electron1_phi/d");
+ tree->Branch("Electron1_e",&Electron1_e,"Electron1_e/d");
+ tree->Branch("Electron2_pt",&Electron2_pt,"Electron2_pt/d");
+ tree->Branch("Electron2_eta",&Electron2_eta,"Electron2_eta/d");
+ tree->Branch("Electron2_phi",&Electron2_phi,"Electron2_phi/d");
+ tree->Branch("Electron2_e",&Electron2_e,"Electron2_e/d");
  
  tree->Branch("nMuon",&nMuon,"nMuon/s");
- tree->Branch("Muon1_pt",&Muon1_pt,"Muon1_pt/f");
- tree->Branch("Muon1_eta",&Muon1_eta,"Muon1_eta/f");
- tree->Branch("Muon1_phi",&Muon1_phi,"Muon1_phi/f"); 
- tree->Branch("Muon2_pt",&Muon2_pt,"Muon2_pt/f");
- tree->Branch("Muon2_eta",&Muon2_eta,"Muon2_eta/f");
- tree->Branch("Muon2_phi",&Muon2_phi,"Muon2_phi/f");
+ tree->Branch("Muon1_pt",&Muon1_pt,"Muon1_pt/d");
+ tree->Branch("Muon1_eta",&Muon1_eta,"Muon1_eta/d");
+ tree->Branch("Muon1_phi",&Muon1_phi,"Muon1_phi/d");
+ tree->Branch("Muon1_e",&Muon1_e,"Muon1_e/d");
+ tree->Branch("Muon2_pt",&Muon2_pt,"Muon2_pt/d");
+ tree->Branch("Muon2_eta",&Muon2_eta,"Muon2_eta/d");
+ tree->Branch("Muon2_phi",&Muon2_phi,"Muon2_phi/d");
+ tree->Brahch("Muon2_e",&Muon2_e,"Muon2_e/d");
 
  // Create object of class ExRootTreeReader
  ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
@@ -340,7 +345,7 @@ void ana(const char *inputFile, const char *outputFile)
  Electron *electron;
  Muon *muon;
 
- int entry, i, njet, nbjet;
+ int entry;
  bool pass = false;
 
  // Loop over all events
@@ -369,20 +374,25 @@ void ana(const char *inputFile, const char *outputFile)
    Jet_pt = 999;
    Jet_eta = 999;
    Jet_phi = 999;
+   Jet_e = 999;
 
    Electron1_pt = 999;
    Electron1_eta = 999;
    Electron1_phi = 999;
+   Electron1_e = 999;
    Electron2_pt = 999;
    Electron2_eta = 999;
    Electron2_phi = 999;
+   Electron2_e = 999;
 
    Muon1_pt = 999;
    Muon1_eta = 999;
    Muon1_phi = 999;
+   Muon1_e = 999;
    Muon2_pt = 999;
    Muon2_eta = 999;
    Muon2_phi = 999;
+   Muon2_e = 999;
 
    bjet1_pt = 999;
    bjet1_eta = 999;
@@ -398,15 +408,15 @@ void ana(const char *inputFile, const char *outputFile)
    bjet3_e = 999;
 
    // Jet and b-tag cuts
-   njet = 0;
-   nbjet = 0;
+   nJet = 0;
+   nbJet = 0;
    for(i = 0; i < branchJet->GetEntriesFast(); ++i){
      jet = (Jet*) branchJet->At(i);
      if( (jet->PT > 30) & (fabs(jet->Eta) < 2.5) ){
-       njet++;
+       nJet++;
        Jets.push_back(jet);
        if( jet->BTag ) {
-         nbjet++;
+         nbJet++;
          bJets.push_back(jet);
        }
      }
@@ -432,12 +442,12 @@ void ana(const char *inputFile, const char *outputFile)
 
    // Dilepton channel cuts
    if(isdilepton) {
-     pass = ((nElectron >= 2) || (nMuon >= 2) || (nElectron >= 1 & nMuon >= 1)) & (njet >= 2) & (nbjet >= 2);
+     pass = ((nElectron >= 2) || (nMuon >= 2) || (nElectron >= 1 & nMuon >= 1)) & (nJet >= 2) & (nbJet >= 2);
      //cout<<"dicut"<<endl;
    }
    // Single lepton channel cuts
    else{
-     pass = (nElectron == 1 || nMuon == 1) & (njet >= 4) & (nbjet >= 2);
+     pass = (nElectron == 1 || nMuon == 1) & (nJet >= 4) & (nbJet >= 2);
      //cout<<"singlecut"<<endl;
    }
 
@@ -447,32 +457,35 @@ void ana(const char *inputFile, const char *outputFile)
    Jet_pt = Jets[0]->PT;
    Jet_eta = Jets[0]->Eta;
    Jet_phi = Jets[0]->Phi;
+   Jet_e = Jets[0]->E;
    if( nElectron == 1){
      Electron1_pt = Electrons[0]->PT;
      Electron1_eta = Electrons[0]->Eta;
      Electron1_phi = Electrons[0]->Phi;
+     Electron1_e = Electrons[0]->E;
    }
    if( nMuon ==1 ){
      Muon1_pt = Muons[0]->PT;
      Muon1_eta = Muons[0]->Eta;
      Muon1_phi = Muons[0]->Phi;
+     Muon1_e = Muons[0]->E;
    }
    if(isdilepton){
      if(nElectron == 2){
        Electron2_pt = Electrons[1]->PT;
        Electron2_eta = Electrons[1]->Eta;
        Electron2_phi = Electrons[1]->Phi;
+       Electron2_e = Electrons[1]->E;
      }
      if(nMuon == 2){
        Muon2_pt = Muons[1]->PT;
        Muon2_eta = Muons[1]->Eta;
        Muon2_phi = Muons[1]->Phi;
+       Muon2_e = Muons[1]->E;
      }
    }
-   nJet = njet;
-   nbJet = nbjet;
-
-   histnjet->Fill( njet );
+   
+   histnjet->Fill( nJet );
    histnElectron->Fill( nElectron );
    histnMuon->Fill( nMuon );
 
@@ -605,7 +618,7 @@ void ana(const char *inputFile, const char *outputFile)
     }
    if( matched1 && matched2 ) matched = true;
 
-   cout<<"nElectron = "<< nElectron <<" nMuon = "<< nMuon <<" njet = "<< njet <<" nbjet = "<< nbjet << endl;
+   //cout<<"nElectron = "<< nElectron <<" nMuon = "<< nMuon <<" nJet = "<< nJet <<" nbJet = "<< nbJet << endl;
 
    ++numberOfSelectedEvents;
   if(matched) numberOfMatchedEvents++;
