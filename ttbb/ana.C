@@ -556,8 +556,8 @@ void ana(const char *inputFile, const char *outputFile)
    TLorentzVector addbjet1;
    TLorentzVector addbjet2;
    if( GenAddbJets.size() >= 2){
-   addbjet1 = GenAddbJets[0]->P4();
-   addbjet2 = GenAddbJets[1]->P4();
+     addbjet1 = GenAddbJets[0]->P4();
+     addbjet2 = GenAddbJets[1]->P4();
    }
    //cout << "=========" << " Number of top = " << ntop << " number of b = " << nb << " (from top = " << nbFromTop << " )" << "=========" << endl;
 
