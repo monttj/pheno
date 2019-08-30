@@ -477,58 +477,6 @@ void ana(const char *inputFile, const char *outputFile)
    }
    if (!pass) continue;
 
-   //cout<<"njet "<<nJet<<" nbjet "<<nbJet<<" nlepton "<<nLepton<<endl;
-   // Fill the tree ntuples (minimum dR)
-   Jet_pt = Jets[0]->P4().Pt();
-   Jet_eta = Jets[0]->P4().Eta();
-   Jet_phi = Jets[0]->P4().Phi();
-   Jet_e = Jets[0]->P4().E();
-   if( nElectron == 1){
-     Electron1_pt = Electrons[0]->P4().Pt();
-     Electron1_eta = Electrons[0]->P4().Eta();
-     Electron1_phi = Electrons[0]->P4().Phi();
-     Electron1_e = Electrons[0]->P4().E();
-   }
-   if( nMuon == 1 ){
-     Muon1_pt = Muons[0]->P4().Pt();
-     Muon1_eta = Muons[0]->P4().Eta();
-     Muon1_phi = Muons[0]->P4().Phi();
-     Muon1_e = Muons[0]->P4().E();
-   }
-   if(isdilepton){
-     if(nElectron == 2){
-       Electron2_pt = Electrons[1]->P4().Pt();
-       Electron2_eta = Electrons[1]->P4().Eta();
-       Electron2_phi = Electrons[1]->P4().Phi();
-       Electron2_e = Electrons[1]->P4().E();
-     }
-     if(nMuon == 2){
-       Muon2_pt = Muons[1]->P4().Pt();
-       Muon2_eta = Muons[1]->P4().Eta();
-       Muon2_phi = Muons[1]->P4().Phi();
-       Muon2_e = Muons[1]->P4().E();
-     }
-   } 
-   bjet1_pt = bJets[0]->P4().Pt();
-   bjet1_eta = bJets[0]->P4().Eta();
-   bjet1_phi = bJets[0]->P4().Phi();
-   bjet1_e = bJets[0]->P4().E();
-   bjet2_pt = bJets[1]->P4().Pt();
-   bjet2_eta = bJets[1]->P4().Eta();
-   bjet2_phi = bJets[1]->P4().Phi();
-   bjet2_e = bJets[1]->P4().E();
-
-   if(bJets.size() >=3){
-     bjet3_pt = bJets[2]->P4().Pt();
-     bjet3_eta = bJets[2]->P4().Eta();
-     bjet3_phi = bJets[2]->P4().Phi();
-     bjet3_e = bJets[2]->P4().E();
-   }
-   
-   histnjet->Fill( nJet );
-   histnElectron->Fill( nElectron );
-   histnMuon->Fill( nMuon );
-
    //Gen b-jets
    int nb = 0;
    int nbFromTop = 0;
@@ -580,6 +528,58 @@ void ana(const char *inputFile, const char *outputFile)
    }
    if( addbjet[0].Pt() == 0 || addbjet[1].Pt() == 0 ) continue;
    //cout << "=========" << " Number of top = " << ntop << " number of b = " << nb << " (from top = " << nbFromTop << " )" << "=========" << endl;
+
+   //cout<<"njet "<<nJet<<" nbjet "<<nbJet<<" nlepton "<<nLepton<<endl;
+   // Fill the tree ntuples (minimum dR)
+   Jet_pt = Jets[0]->P4().Pt();
+   Jet_eta = Jets[0]->P4().Eta();
+   Jet_phi = Jets[0]->P4().Phi();
+   Jet_e = Jets[0]->P4().E();
+   if( nElectron == 1){
+     Electron1_pt = Electrons[0]->P4().Pt();
+     Electron1_eta = Electrons[0]->P4().Eta();
+     Electron1_phi = Electrons[0]->P4().Phi();
+     Electron1_e = Electrons[0]->P4().E();
+   }
+   if( nMuon == 1 ){
+     Muon1_pt = Muons[0]->P4().Pt();
+     Muon1_eta = Muons[0]->P4().Eta();
+     Muon1_phi = Muons[0]->P4().Phi();
+     Muon1_e = Muons[0]->P4().E();
+   }
+   if(isdilepton){
+     if(nElectron == 2){
+       Electron2_pt = Electrons[1]->P4().Pt();
+       Electron2_eta = Electrons[1]->P4().Eta();
+       Electron2_phi = Electrons[1]->P4().Phi();
+       Electron2_e = Electrons[1]->P4().E();
+     }
+     if(nMuon == 2){
+       Muon2_pt = Muons[1]->P4().Pt();
+       Muon2_eta = Muons[1]->P4().Eta();
+       Muon2_phi = Muons[1]->P4().Phi();
+       Muon2_e = Muons[1]->P4().E();
+     }
+   } 
+   bjet1_pt = bJets[0]->P4().Pt();
+   bjet1_eta = bJets[0]->P4().Eta();
+   bjet1_phi = bJets[0]->P4().Phi();
+   bjet1_e = bJets[0]->P4().E();
+   bjet2_pt = bJets[1]->P4().Pt();
+   bjet2_eta = bJets[1]->P4().Eta();
+   bjet2_phi = bJets[1]->P4().Phi();
+   bjet2_e = bJets[1]->P4().E();
+
+   if(bJets.size() >=3){
+     bjet3_pt = bJets[2]->P4().Pt();
+     bjet3_eta = bJets[2]->P4().Eta();
+     bjet3_phi = bJets[2]->P4().Phi();
+     bjet3_e = bJets[2]->P4().E();
+   }
+   
+   histnjet->Fill( nJet );
+   histnElectron->Fill( nElectron );
+   histnMuon->Fill( nMuon );
 
    //Matched b-jets
    vector<Jet*> MatchedbJets;
