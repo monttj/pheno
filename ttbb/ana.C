@@ -199,8 +199,10 @@ bool isFromTop(const GenParticle* p, const TClonesArray* branchParticle){
   return output;
 }
 
-void ana(const char *inputFile, const char *outputFile)
+void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
 {
+ //jcut is for the number of jets cut and bcut is for the number of b-jets cut
+ 
  gSystem->Load("libDelphes");
 
  // Create chain of root trees
@@ -362,13 +364,17 @@ void ana(const char *inputFile, const char *outputFile)
  Muon *muon;
 
  int entry, i;
- bool pass = false;
+ // Selected Events (Cut Flow)
+ int s1 = 0;
+ int s2 = 0;
+ int s3 = 0;
+ bool leptonSelection = false;
 
  // Loop over all events
  for(entry = 0; entry < numberOfEntries; ++entry)
  {
-   if(entry%1000 == 0) cout << "event number: " << entry << endl;
-
+   if(entry%1000 == 0 && entry < 10000) cout << "event number: " << entry << endl;
+   else if(entry%10000 == 0) cout<< "event number: " << entry << endl;
    // Load selected branches with data from specified event
    treeReader->ReadEntry(entry);
    
@@ -436,48 +442,7 @@ void ana(const char *inputFile, const char *outputFile)
    bjet3_phi = 999;
    bjet3_e = 999;
 
-   // Jet and b-tag Selections
-   nJet = 0;
-   nbJet = 0;
-   for(i = 0; i < branchJet->GetEntriesFast(); ++i){
-     jet = (Jet*) branchJet->At(i);
-     if( (jet->PT < 30) || (fabs(jet->Eta) > 2.5) ) continue;
-     nJet++;
-     Jets.push_back(jet);
-     if( jet->BTag ) {
-       nbJet++;
-       bJets.push_back(jet);
-     }
-   }
-
-   if ( nJet < 6 || nbJet < 3 ) continue;
-
-   //Electron Selection
-   nElectron = 0;
-   for(i = 0; i < branchElectron->GetEntries(); ++i){
-     electron = (Electron*) branchElectron->At(i);
-     if( (electron->PT < 30) || (fabs(electron->Eta) > 2.5)) continue;
-     nElectron++;
-     Electrons.push_back(electron);
-   }
-   //Muon Selection
-   nMuon = 0;
-   for(i = 0; i < branchMuon->GetEntries(); ++i){
-     muon = (Muon*) branchMuon->At(i);
-     if( (muon->PT < 30) || (fabs(muon->Eta) > 2.5) ) continue;
-     nMuon++;
-     Muons.push_back(muon);
-   }
-   nLepton = nElectron + nMuon;
-   if( isdilepton ){
-     pass = (nLepton >= 2);
-   }
-   else{
-     pass = (nLepton == 1);
-   }
-   if (!pass) continue;
-
-   //Gen b-jets
+   //Genaddbjet Selection (S1)
    int nb = 0;
    int nbFromTop = 0;
    int nb_status3 = 0; 
@@ -511,7 +476,8 @@ void ana(const char *inputFile, const char *outputFile)
          GenAddbJets.push_back(genP);
        }
      }
-   }
+   } 
+   //cout << "=========" << " Number of top = " << ntop << " number of b = " << nb << " (from top = " << nbFromTop << " )" << "=========" << endl;
    
    //Select 2 addbjets in descending order of Pt
    TLorentzVector addbjet[2];
@@ -526,10 +492,53 @@ void ana(const char *inputFile, const char *outputFile)
        addbjet[1] = GenAddbJets[j]->P4();
      }
    }
-   if( addbjet[0].Pt() == 0 || addbjet[1].Pt() == 0 ) continue;
-   //cout << "=========" << " Number of top = " << ntop << " number of b = " << nb << " (from top = " << nbFromTop << " )" << "=========" << endl;
+   if( addbjet[0].Pt() == 0 || addbjet[1].Pt() == 0 ) continue;   // S1
+   s1++;
 
+   //Lepton Selection (S2)
+   //Electron Selection
+   nElectron = 0;
+   for(i = 0; i < branchElectron->GetEntries(); ++i){
+     electron = (Electron*) branchElectron->At(i);
+     if( (electron->PT < 30) || (fabs(electron->Eta) > 2.5)) continue;
+     nElectron++;
+     Electrons.push_back(electron);
+   }
+   //Muon Selection
+   nMuon = 0;
+   for(i = 0; i < branchMuon->GetEntries(); ++i){
+     muon = (Muon*) branchMuon->At(i);
+     if( (muon->PT < 30) || (fabs(muon->Eta) > 2.5) ) continue;
+     nMuon++;
+     Muons.push_back(muon);
+   }
+   nLepton = nElectron + nMuon;
+   if( isdilepton ){
+     leptonSelection = (nLepton >= 2);
+   }
+   else{
+     leptonSelection = (nLepton == 1);
+   }
+   if (!leptonSelection) continue;   // S2
+   s2++;
+
+   // Jet and b-tag Selections (S3)
+   nJet = 0;
+   nbJet = 0;
+   for(i = 0; i < branchJet->GetEntriesFast(); ++i){
+     jet = (Jet*) branchJet->At(i);
+     if( (jet->PT < 30) || (fabs(jet->Eta) > 2.5) ) continue;
+     nJet++;
+     Jets.push_back(jet);
+     if( jet->BTag ) {
+       nbJet++;
+       bJets.push_back(jet);
+     }
+   }
+   if ( nJet < jcut || nbJet < bcut ) continue;   // S3
+   s3++;
    //cout<<"njet "<<nJet<<" nbjet "<<nbJet<<" nlepton "<<nLepton<<endl;
+   
    // Fill the tree ntuples (minimum dR)
    Jet_pt = Jets[0]->P4().Pt();
    Jet_eta = Jets[0]->P4().Eta();
@@ -685,10 +694,19 @@ void ana(const char *inputFile, const char *outputFile)
 
  }
 
- cout << "Total number of events = " << numberOfSelectedEvents << endl;
- cout << "Total number of matched events = " << numberOfMatchedEvents << endl;
+ cout<<"Event Info : jet >= "<<jcut<<" bjet >= "<<bcut<<endl;
+ //cout << "Total number of events = " << numberOfSelectedEvents << endl;
+ //cout << "Total number of matched events = " << numberOfMatchedEvents << endl;
  double eff = (double) numberOfMatchedEvents/ (double) numberOfSelectedEvents;
- cout << "Matching eff. = " << eff << endl;
+ cout << "Matching eff. = " << eff << " ( "<<numberOfMatchedEvents<<" / "<<numberOfSelectedEvents<<" )"<< endl;
+ double accept1 = (double) s1 / (double) numberOfEntries; 
+ double accept2 = (double) s2 / (double) numberOfEntries;
+ double accept3 = (double) s3 / (double) numberOfEntries;
+ cout << "Entries "<<numberOfEntries<<endl;
+ cout << "Acceptance1 (S1/Entry) = "<<accept1<<" ( "<<s1<<" )"<<endl;
+ cout << "Acceptance2 (S2/Entry) = "<<accept2<<" ( "<<s2<<" )"<<endl;
+ cout << "Acceptance3 (S3/Entry) = "<<accept3<<" ( "<<s3<<" )"<<endl;
+
  fout->Write();
  fout->Close();
 
