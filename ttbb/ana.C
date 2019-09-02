@@ -10,14 +10,14 @@ R__LOAD_LIBRARY(libDelphes)
 #endif
 #include <vector>
 
-GenParticle* MotherParticle(const GenParticle* p, const TClonesArray* branchParticle, int i = 1){
+GenParticle* MotherParticle(const GenParticle* p, const TClonesArray* branchParticle, int i = 0){
 
   if( p == 0) return 0;
 
   int PID = p->PID;
   int index[2];
-  index[i-1] = p->M1;
-  index[i-1] = p->M2;
+  index[0] = p->M1;
+  index[1] = p->M2;
 
   GenParticle * m = 0;
 
@@ -327,6 +327,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  Long64_t numberOfEntries = treeReader->GetEntries();
 
  // Get pointers to branches used in this analysis
+ TClonesArray *branchGenJet  = treeReader->UseBranch("GenJet");
  TClonesArray *branchJet  = treeReader->UseBranch("Jet");
  TClonesArray *branchParticle  = treeReader->UseBranch("Particle");
  TClonesArray *branchElectron = treeReader->UseBranch("Electron");
@@ -338,16 +339,16 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  TH1 *histnMuon = new TH1F("h_nMuon", "Number of muons", 3, 0.0, 3.0);
  
  TH1 *histnbjet = new TH1F("h_nbjet", "Number of b-jets", 10, 0.0, 10.0);
- TH1 *histMbb = new TH1F("h_mbb", "M_{inv}(b, b)", 40, 20.0, 180.0);
- TH1 *histdRbb = new TH1F("h_dRbb", "dR(b, b)", 40, 0, 4.0);
+ TH1 *histMbb = new TH1F("h_mbb", "M_{inv}(b, b)", 20, 20.0, 180.0);
+ TH1 *histdRbb = new TH1F("h_dRbb", "dR(b, b)", 20, 0, 4.0);
 
  TH1 *hist_gennbjet = new TH1F("h_gennbjet", "Number of b-jets", 6, 0.0, 6.0);
- TH1 *hist_genMbb = new TH1F("h_genmbb", "M_{inv}(b, b)", 40, 20.0, 180.0);
- TH1 *hist_gendRbb = new TH1F("h_gendRbb", "dR(b, b)", 40, 0, 4.0);
+ TH1 *hist_genMbb = new TH1F("h_genmbb", "M_{inv}(b, b)", 20, 20.0, 180.0);
+ TH1 *hist_gendRbb = new TH1F("h_gendRbb", "dR(b, b)", 20, 0, 4.0);
 
  TH1 *hist_matchednbjet = new TH1F("h_matchednbjet", "Number of b-jets", 6, 0.0, 6.0);
- TH1 *hist_matchedMbb = new TH1F("h_matchedmbb", "M_{inv}(b, b)", 40, 20.0, 180.0);
- TH1 *hist_matcheddRbb = new TH1F("h_matcheddRbb", "dR(b, b)", 40, 0, 4.0);
+ TH1 *hist_matchedMbb = new TH1F("h_matchedmbb", "M_{inv}(b, b)", 20, 20.0, 180.0);
+ TH1 *hist_matcheddRbb = new TH1F("h_matcheddRbb", "dR(b, b)", 20, 0, 4.0);
 
  Int_t numberOfSelectedEvents = 0;
  Int_t numberOfMatchedEvents = 0;
@@ -447,7 +448,8 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    int nbFromTop = 0;
    int nb_status3 = 0; 
    int ntop = 0;
-   vector<GenParticle*> GenAddbJets;
+   vector<GenParticle*> GenAddbQuarks;
+   vector<Jet*> GenAddbJets;
    for(i = 0; i < branchParticle->GetEntriesFast(); ++i){
      GenParticle *genP = (GenParticle*) branchParticle->At(i);
      if( abs(genP->PID) == 6 ) {
@@ -473,10 +475,19 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
        if(fromTop) {
          nbFromTop++;
        }else{
-         GenAddbJets.push_back(genP);
+         GenAddbQuarks.push_back(genP);
        }
      }
    } 
+
+   for(i = 0; i < branchGenJet->GetEntriesFast(); ++i){
+     Jet *genjet = (Jet*) branchGenJet->At(i);
+     for( int j = 0 ; j < GenAddbQuarks.size() ; j++){
+       double dR = GenAddbQuarks[j]->P4().DeltaR( genjet->P4() );
+       if( dR < 0.5 ) GenAddbJets.push_back(genjet);
+     }
+   }
+
    //cout << "=========" << " Number of top = " << ntop << " number of b = " << nb << " (from top = " << nbFromTop << " )" << "=========" << endl;
    
    //Select 2 addbjets in descending order of Pt
