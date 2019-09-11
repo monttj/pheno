@@ -260,9 +260,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  double Muon2_pt, Muon2_eta, Muon2_phi, Muon2_e;
  int MATCHED;
  // Selected Events (Cut Flow)
- int s1 = 0;
- int s2 = 0;
- int s3 = 0;
+ int s1, s2, s3;
 
  //Tree for Deep learning input 
  TTree * dnn_tree = new TTree( "dnn_input", "tree for dnn");
@@ -542,6 +540,9 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    bjet3_phi = 999;
    bjet3_e = 999;
    MATCHED = -1;
+   s1 = 0;
+   s2 = 0;
+   s3 = 0;
 
    //Genaddbjet Selection (S1)
    int nb = 0;
