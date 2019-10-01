@@ -260,6 +260,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  double Electron2_pt, Electron2_eta, Electron2_phi, Electron2_e;
  double Muon1_pt, Muon1_eta, Muon1_phi, Muon1_e;
  double Muon2_pt, Muon2_eta, Muon2_phi, Muon2_e;
+ double MET_px, MET_py;
  int MATCHED;
  // Selected Events (Cut Flow)
  int s1 = 0;
@@ -419,6 +420,8 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  tree->Branch("Muon2_phi",&Muon2_phi,"Muon2_phi/d");
  tree->Branch("Muon2_e",&Muon2_e,"Muon2_e/d");
 
+ tree->Branch("MET_px",&MET_px,"MET_px/d");
+ tree->Branch("MET_py",&MET_py,"MET_py/d");
  tree->Branch("nLepton",&nLepton,"nLepton/s");
  tree->Branch("MATCHED",&MATCHED,"MATCHED/i");
  
@@ -624,6 +627,8 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    bjet3_eta = 999;
    bjet3_phi = 999;
    bjet3_e = 999;
+   MET_px = 999;
+   MET_py = 999;
    MATCHED = -1;
 
    //Genaddbjet Selection (S1)
@@ -733,13 +738,23 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    s3++;
    //cout<<"njet "<<njets<<" nbjet "<<nbjets<<" nlepton "<<nLepton<<endl;
 
-   // MissingET 4-vector
    TLorentzVector nu;
    if( branchMissingET->GetEntriesFast() > 0){
      met = (MissingET*) branchMissingET->At(0);
+     MET_px = met->MET * cos( met->Phi);
+     MET_py = met->MET * sin( met->Phi);
      //cout << "px " << MET_px <<" py "<< MET_py<<" MET "<<met->MET<<endl;
-     nu = met->P4();
+     nu.SetPxPyPzE( MET_px, MET_py, 0, met->MET );
    }
+
+   // MissingET 4-vector
+   //TLorentzVector nu;
+   //if( branchMissingET->GetEntriesFast() > 0){
+   //  met = (MissingET*) branchMissingET->At(0);
+     //cout << "px " << MET_px <<" py "<< MET_py<<" MET "<<met->MET<<endl;
+     
+     //nu = met->P4();
+   //}
 
    //Lepton 4-vector ( only for lep+jet )
    TLorentzVector lep;
@@ -835,8 +850,10 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    TLorentzVector tmpWj;
    double tmpWjM = -1;
    for(int j1 = 0; j1 < njets-1; j1++) {
+     if(Jets[j1]->BTag) continue;
      TLorentzVector jet1 = Jets[j1]->P4();
      for(int j2 = j1+1; j2 < njets; j2++) {
+       if(Jets[j2]->BTag) continue;
        TLorentzVector jet2 = Jets[j2]->P4();
 
        tmpWj = jet1 + jet2;
