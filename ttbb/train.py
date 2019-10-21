@@ -1,10 +1,25 @@
 #! /usr/bin/env python
+
+# python train_test.py "Nodes" "Layers" "Name" "Additional Name"
+# Here name is event selection ( 22, 32 ,42, ... )
+# Additional name is arbitrary name to prevent overlapping.
+# You should check the trainInput (line 58) and ver (line 59)
+
 from __future__ import print_function
 import sys, os
 import google.protobuf
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+a = int(sys.argv[1]) #Nodes
+layers = int(sys.argv[2])
+name = sys.argv[3]
+additionalname = sys.argv[4]
+if additionalname == None: additionalname == ""
+device = sys.argv[5]
 
+os.environ["CUDA_VISIBLE_DEVICES"] = device
+
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, label_binarize
@@ -23,6 +38,10 @@ import ROOT
 from array import array
 
 import tensorflow as tf
+from keras.backend.tensorflow_backend import set_session
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.1
+set_session(tf.Session(config=config))
 import keras
 from keras.utils import np_utils, multi_gpu_model
 from keras.models import Model, Sequential, load_model
@@ -33,9 +52,11 @@ from keras.optimizers import Adam, SGD
 from keras.callbacks import Callback, ModelCheckpoint
 
 import utils as ut
+import time
+import pickle
 
-trainInput = "array/array_train_ttbb.h5"
-ver = ""
+trainInput = "/home/ljw1015/deepCSV_var89_f1/deepCSV_4f_lj_"+name+".h5"
+ver = "/20191014_var79/"+name+additionalname+"/node"+str(a)+"layer"+str(layers)
 configDir = ""
 weightDir = ""
 modelfile = ""
@@ -46,13 +67,11 @@ if os.path.exists('./var.txt'):
             line = f.readline()
             if not line : break
             tmp = line.split()
-            if "trainInput" in tmp : trainInput = "input/"+tmp[1]
-            if "ver" in tmp : ver = tmp[1]
+            #if "trainInput" in tmp : trainInput = tmp[1]
             if "configDir" in tmp : configDir = tmp[1]
             if "weightDir" in tmp : weightDir = tmp[1]
             if "modelfile" in tmp : modelfile = tmp[1]
 
-if ver       == "": ver = "01"
 if configDir == "": configDir = os.getcwd()+"/"
 if weightDir == "": weightDir = "train"
 if modelfile == "": modelfile = "model_tmp"
@@ -74,6 +93,8 @@ if os.environ["CUDA_VISIBLE_DEVICES"] in ["0","1","2","3"] : multiGPU = False
 auc_list = []
 val_auc_list = []
 mateff = []
+matevt = []
+epochtime = []
 
 #######################
 #Plot correlaton matrix
@@ -137,7 +158,7 @@ def inputvars(sigdata, bkgdata, signame, bkgname, **kwds):
         bkgdata[colname].plot.hist(color='r', density=True, range=low_high, bins=bins, histtype='step', label='background')
         plt.xlabel(colname)
         plt.ylabel('A.U.')
-        plt.title('Intput variables')
+        #plt.title('Intput variables')
         plt.legend(loc='upper right')
         plt.savefig(configDir+weightDir+ver+'/fig_input_'+colname+'.pdf')
         plt.gcf().clear()
@@ -148,13 +169,14 @@ def inputvars(sigdata, bkgdata, signame, bkgname, **kwds):
 #Compute AUC after training and plot ROC
 ########################################
 class roc_callback(Callback):
-    def __init__(self, training_data, validation_data, model, event):
+    def __init__(self, training_data, validation_data, model, event, epoch_time):
         self.x = training_data[0]
         self.y = training_data[1]
         self.x_val = validation_data[0]
         self.y_val = validation_data[1]
         self.model_to_save = model
         self.event = event
+        self.epoch_time = epoch_time
 
     def on_train_begin(self, logs={}):
         return
@@ -163,9 +185,14 @@ class roc_callback(Callback):
         return
 
     def on_epoch_begin(self, epoch, logs={}):
+        self.epoch_time = time.time()
         return
 
     def on_epoch_end(self, epoch, logs={}):
+        epoch_time = self.epoch_time
+        print('RunTime of epoch '+str(epoch+1)+': %s ' % (time.time() - epoch_time))
+        epochtime.append(time.time() - epoch_time)
+
         ############
         #compute AUC
         ############
@@ -192,7 +219,7 @@ class roc_callback(Callback):
         test_match_eff = float(test_matched)/test_nevt
         print('Matching efficiency = ' + str(test_matched) + ' / ' + str(test_nevt) + ' = ' + str(test_match_eff))
         mateff.append(test_match_eff)
-
+        matevt.append(test_nevt)
         ###################
         #Calculate f1 score
         ###################
@@ -221,6 +248,16 @@ class roc_callback(Callback):
         plt.legend(['Test', 'Train'], loc='lower left')
         plt.savefig(os.path.join(configDir, weightDir+ver, 'fig_roc_%d_%.4f.pdf' %(epoch+1,round(roc_val,4))))
         plt.gcf().clear()
+        
+        # ROC List save
+        with open(configDir+weightDir+ver+"/list_test_s_"+str(epoch+1)+".txt","wb") as f_test_sig:
+            pickle.dump(tpr[1], f_test_sig)
+        with open(configDir+weightDir+ver+"/list_test_b_"+str(epoch+1)+".txt","wb") as f_test_bkg:
+            pickle.dump(fpr[1], f_test_bkg)
+        with open(configDir+weightDir+ver+"/list_train_s_"+str(epoch+1)+".txt","wb") as f_train_sig:
+            pickle.dump(tpr[2], f_train_sig)
+        with open(configDir+weightDir+ver+"/list_train_b_"+str(epoch+1)+".txt","wb") as f_train_bkg:
+            pickle.dump(fpr[2], f_train_bkg)
 
         ########################################################
         #Overtraining Check, as well as bkg & sig discrimination
@@ -231,27 +268,27 @@ class roc_callback(Callback):
         high = max(np.max(d) for d in scores)
         low_high = (low,high)
 
-        #test is filled
-        plt.hist(tpr[1],
+        #train is filled
+        plt.hist(tpr[2],
             color='b', alpha=0.5, range=low_high, bins=bins,
-            histtype='stepfilled', density=True, label='S (test)')
-        plt.hist(fpr[1],
+            histtype='stepfilled', density=True, label='S (train)')
+        plt.hist(fpr[2],
             color='r', alpha=0.5, range=low_high, bins=bins,
-            histtype='stepfilled', density=True, label='B (test)')
+            histtype='stepfilled', density=True, label='B (train)')
 
-        #training is dotted
-        hist, bins = np.histogram(tpr[2], bins=bins, range=low_high, density=True)
-        scale = len(tpr[2]) / sum(hist)
+        #test is dotted
+        hist, bins = np.histogram(tpr[1], bins=bins, range=low_high, density=True)
+        scale = len(tpr[1]) / sum(hist)
         err = np.sqrt(hist * scale) / scale
         width = (bins[1] - bins[0])
         center = (bins[:-1] + bins[1:]) / 2
-        plt.errorbar(center, hist, yerr=err, fmt='o', c='b', label='S (training)')
-        hist, bins = np.histogram(fpr[2], bins=bins, range=low_high, density=True)
-        scale = len(tpr[2]) / sum(hist)
+        plt.errorbar(center, hist, yerr=err, fmt='o', c='b', label='S (test)')
+        hist, bins = np.histogram(fpr[1], bins=bins, range=low_high, density=True)
+        scale = len(tpr[1]) / sum(hist)
         err = np.sqrt(hist * scale) / scale
-        plt.errorbar(center, hist, yerr=err, fmt='o', c='r', label='B (training)')
+        plt.errorbar(center, hist, yerr=err, fmt='o', c='r', label='B (test)')
 
-        plt.xlabel("Deep Learning Score")
+        plt.xlabel("Deep Learning Output")
         plt.ylabel("Arbitrary units")
         plt.legend(loc='best')
         overtrain_path = configDir+weightDir+ver+'/fig_overtraining_%d_%.4f.pdf' %(epoch+1,round(roc_val,4))
@@ -277,13 +314,16 @@ class roc_callback(Callback):
         return
 
 data = pd.read_hdf(trainInput)
+print("run start")
+run_start_time = time.time()
+
 data = data.reset_index(drop=True)
 ##########################################
 #drop phi and label features, correlations
 ##########################################
 labels = data.filter(['signal'], axis=1)
 
-all_event = data.filter(['event','addbjet1_pt','addbjet2_pt','signal'], axis=1)
+all_event = data.filter(['event','addbjet1_pt','addbjet2_pt','signal','addbjet1_eta','addbjet2_eta'], axis=1)
 
 data = data.filter(['signal']+ut.getVarlist())
 data.astype('float32')
@@ -298,9 +338,15 @@ data = data.drop(['signal'], axis=1) #then drop label
 ###############
 #split datasets
 ###############
-groupped_event = all_event.drop_duplicates(subset=['event','addbjet1_pt','addbjet2_pt'])
+groupped_event = all_event.drop_duplicates(subset=['event','addbjet1_pt','addbjet2_pt','addbjet1_eta','addbjet2_eta'])
 nevt = len(groupped_event)
+print("###################################")
+print("groupped event")
 print(len(groupped_event))
+
+nsig = all_event.loc[labels['signal'] == 1].drop_duplicates(subset=['event','addbjet1_pt','addbjet2_pt','addbjet1_eta','addbjet2_eta'])
+print("groupped signal 1")
+print(len(nsig))
 
 split_nevt = groupped_event[:int(nevt*0.8)].iloc[-1]
 split_point = -1
@@ -316,6 +362,11 @@ train_bkg = train_event.loc[labels['signal'] == 0]
 test_sig = test_event.loc[labels['signal'] == 1]
 test_bkg = test_event.loc[labels['signal'] == 0]
 
+groupped_test_sig = test_sig.drop_duplicates(subset=['event','addbjet1_pt','addbjet2_pt','addbjet1_eta','addbjet2_eta'])
+ntestsig = len(groupped_test_sig)
+print("groupped test_sig events")
+print(ntestsig)
+
 train_idx = pd.concat([train_sig, train_bkg]).sort_index().index
 test_idx = pd.concat([test_sig, test_bkg]).sort_index().index
 
@@ -325,9 +376,12 @@ data_test = data.loc[test_idx,:].copy()
 labels_train = labels.loc[train_idx,:].copy()
 labels_test = labels.loc[test_idx,:].copy()
 
+print('combinations')
 print('Training signal: '+str(len(train_sig))+' / testing signal: '+str(len(test_sig))+' / training background: '+str(len(train_bkg))+' / testing background: '+str(len(test_bkg)))
 #print(str(len(X_train)) +' '+ str(len(Y_train)) +' ' + str(len(X_test)) +' '+ str(len(Y_test)))
 #print(labels)
+
+print("$###############3333")
 
 labels_train = labels_train.values
 Y_train = np_utils.to_categorical(labels_train)
@@ -343,33 +397,47 @@ data_test_sc = scaler.fit_transform(data_test)
 X_train = data_train_sc
 X_test = data_test_sc
 
+print("train")
+train_start_time = time.time()
+
 #################################
 #Keras model compile and training
 #################################
 nvar = data.shape[1]
-a = 50
+
 b = 0.08
 init = 'glorot_uniform'
 
-with tf.device("/cpu:0") :
-    inputs = Input(shape=(nvar,))
-    x = Dense(5, kernel_regularizer=l2(1E-2))(inputs)
-    x = Dropout(b)(x)
+inputs = Input(shape=(nvar,))
+x = Dense(a, kernel_regularizer=l2(1E-2))(inputs)
+x = Dropout(b)(x)
+for i in range(layers):
     x = BatchNormalization()(x)
-    #branch_point1 = Dense(a, name='branch_point1')(x)
+#branch_point1 = Dense(a, name='branch_point1')(x)
     x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
     x = Dropout(b)(x)
-    x = BatchNormalization()(x)
-    x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
-    x = Dropout(b)(x)
+predictions = Dense(2, activation='softmax')(x)
+model = Model(inputs=inputs, outputs=predictions)
+#with tf.device("/cpu:0") :
+#    inputs = Input(shape=(nvar,))
+#    x = Dense(a, kernel_regularizer=l2(1E-2))(inputs)
+#    x = Dropout(b)(x)
+#    for i in range(layers):
+#        x = BatchNormalization()(x)
+#        branch_point1 = Dense(a, name='branch_point1')(x)
+#        x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
+#        x = Dropout(b)(x)
+    #x = BatchNormalization()(x)
+    #x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
+    #x = Dropout(b)(x)
     #x = add([x, branch_point1])
-    x = BatchNormalization()(x)
+    #x = BatchNormalization()(x)
     #branch_point2 = Dense(a, name='branch_point2')(x)
-    x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
-    x = Dropout(b)(x)
-    x = BatchNormalization()(x)
-    x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
-    x = Dropout(b)(x)
+    #x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
+    #x = Dropout(b)(x)
+    #x = BatchNormalization()(x)
+    #x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
+    #x = Dropout(b)(x)
     #x = add([x, branch_point2])
 ###    x = BatchNormalization()(x)
 ###    #branch_point3 = Dense(a, name='branch_point3')(x)
@@ -381,7 +449,7 @@ with tf.device("/cpu:0") :
 ###    #x = add([x, branch_point3])
 ###    x = BatchNormalization()(x)
 ###    #branch_point4 = Dense(a, name='branch_point4')(x)
-###    x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
+###   x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
 ###    x = Dropout(b)(x)
 ###    x = BatchNormalization()(x)
 ###    x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
@@ -398,8 +466,8 @@ with tf.device("/cpu:0") :
     #x = BatchNormalization()(x)
     #x = Dense(a, activation='relu', kernel_initializer=init, bias_initializer='zeros')(x)
     #x = Dropout(b)(x)
-    predictions = Dense(2, activation='softmax')(x)
-    model = Model(inputs=inputs, outputs=predictions)
+#    predictions = Dense(2, activation='softmax')(x)
+#    model = Model(inputs=inputs, outputs=predictions)
 
 if multiGPU : train_model = multi_gpu_model(model, gpus=4)
 else : train_model = model
@@ -412,11 +480,14 @@ modelfile = 'model_{epoch:02d}_{val_binary_accuracy:.4f}.h5'
 checkpoint = ModelCheckpoint(configDir+weightDir+ver+'/'+modelfile, monitor='val_binary_accuracy', verbose=1, save_best_only=False)#, mode='max')
 
 history = train_model.fit(X_train, Y_train,
-                             epochs=50, batch_size=1024,
+                             epochs=500, 
+                             batch_size=1024,
                              validation_data=(X_test,Y_test),
                              #class_weight={ 0: 14, 1: 1 }, 
-                             callbacks=[roc_callback(training_data=(X_train,Y_train), validation_data=(X_test,Y_test), model=train_model, event=test_event)]
+                             callbacks=[roc_callback(training_data=(X_train,Y_train), validation_data=(X_test,Y_test), model=train_model, event=test_event, epoch_time=time.time())]
                              )
+
+train_end_time = time.time()
 
 print("Plotting scores")
 plt.plot(history.history['binary_accuracy'])
@@ -430,7 +501,7 @@ plt.gcf().clear()
 
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
-plt.title('Binary crossentropy')
+#plt.title('Binary crossentropy')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
 plt.legend(['Train','Test'],loc='upper right')
@@ -447,11 +518,19 @@ plt.savefig(os.path.join(configDir,weightDir+ver,'fig_score_auc.pdf'))
 plt.gcf().clear()
 
 plt.plot(mateff)
-plt.title('Matching Efficiencies with Epoch')
+#plt.title('Matching Efficiencies with Epoch')
 plt.ylabel('Matching Efficiencies')
 plt.xlabel('Epoch')
 plt.legend(['Test'], loc='upper right')
 plt.savefig(os.path.join(configDir,weightDir+ver,'fig_score_mateff.pdf'))
+plt.gcf().clear()
+
+plt.plot(epochtime)
+plt.title('Time per each epochs')
+plt.ylabel('Time')
+plt.xlabel('Epoch')
+plt.legend(['Test'], loc='upper right')
+plt.savefig(os.path.join(configDir,weightDir+ver,'fig_score_epochtime.pdf'))
 plt.gcf().clear()
 
 print("Now predict score with test set")
@@ -484,7 +563,73 @@ y_pred = model_best.predict(X_test, batch_size=1024)
 #print("Test accuracy : ", score[1])
 #print(y_pred)
 
+print("Total running time :%s " %(time.time() - run_start_time))
+print("Total Training time (with all contents of callbacks) :%s " %(train_end_time - train_start_time))
+
+with open(configDir+weightDir+ver+"/result.txt", "w") as f_log :
+    print("writing results ...")
+    tmp=bestModel.split('_')
+    bestEpoch=tmp[1]
+    print(bestEpoch)
+    a1=mateff[int(bestEpoch)-1]
+    a2=matevt[int(bestEpoch)-1]
+    a3=round(a1*a2,0)
+
+    f_log.write("\ntrainInput "+trainInput+"\n")
+    f_log.write("ver "+ver+"\n")
+    f_log.write("BestModel: "+str(bestModel)+"\n")
+    f_log.write("Best Matching eff. = "+str(round(a1,4))+" ( "+str(int(a3))+" / "+ str(int(a2)) +" )\n")
+    f_log.write("Total running time = "+str(time.time() - run_start_time)+"\n")
+    f_log.write("Total training time (with all contents of call backs) = "+ str(train_end_time - train_start_time)+"\n")
+    
+    f_log.write("Total Matchable = "+ str(len(nsig))+" , Total Events = "+str(nevt)+"\n")
+    f_log.write("Test signal(matchable) events = "+str(ntestsig)+"\n")
+    
+    
+    #f_log.write("training_signal: "+str(len(train_sig))+"\n")
+    #f_log.write("training_background: "+str(len(train_bkg))+"\n")
+    #f_log.write("Nodes: "+str(a)+"\n")
+    #f_log.write("Layers: "+str(layers)+"\n")
+
+# Matching Efficiency List
+with open(configDir+weightDir+ver+"/list_mateff.txt","wb") as f_mateff:
+    print("writing matching efficiencies ...")
+    pickle.dump(mateff, f_mateff)
+
+# Epochtime List
+with open(configDir+weightDir+ver+"/list_epochtime.txt","wb") as f_epochtime:
+    print("writing time per each epochs ...")
+    pickle.dump(epochtime, f_epochtime)
+
+# Accuracy List
+with open(configDir+weightDir+ver+"/list_acc_train.txt","wb") as f_acc_train:
+    print("writing training accuracy ...")
+    pickle.dump(history.history['binary_accuracy'], f_acc_train)
+with open(configDir+weightDir+ver+"/list_acc_test.txt","wb") as f_acc_test:
+    print("writing test accuracy ...")
+    pickle.dump(history.history['val_binary_accuracy'], f_acc_test)
+
+# Loss List
+with open(configDir+weightDir+ver+"/list_loss_train.txt","wb") as f_loss_train:
+    print("writing training loss ...")
+    pickle.dump(history.history['loss'], f_loss_train)
+with open(configDir+weightDir+ver+"/list_loss_test.txt","wb") as f_loss_test:
+    print("writing test loss ...")
+    pickle.dump(history.history['val_loss'], f_loss_test)
+
+# AUC List
+with open(configDir+weightDir+ver+"/list_auc_train.txt","wb") as f_auc_train:
+    print("writing training AUC ...")
+    pickle.dump(auc_list, f_auc_train)
+with open(configDir+weightDir+ver+"/list_auc_test.txt","wb") as f_auc_test:
+    print("writing test AUC ...")
+    pickle.dump(val_auc_list, f_auc_test)
+
+
+
+
 with open("var.txt", "w") as f :
+    f.write("trainInput "+trainInput+"\n")
     f.write("ver "+ver+"\n")
     f.write("configDir "+configDir+"\n")
     f.write("weightDir "+weightDir+"\n")
