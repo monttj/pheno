@@ -450,7 +450,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  TH1 *hist_genMbb = new TH1F("h_genmbb", "M_{inv}(b, b)", 20, 20.0, 180.0);
  TH1 *hist_gendRbb = new TH1F("h_gendRbb", "dR(b, b)", 20, 0, 4.0);
 
- TH1 *hist_matchednbjet = new TH1F("h_matchednbjet", "Number of b-jets", 6, 0.0, 6.0);
+ //TH1 *hist_matchednbjet = new TH1F("h_matchednbjet", "Number of b-jets", 6, 0.0, 6.0);
  TH1 *hist_matchedMbb = new TH1F("h_matchedmbb", "M_{inv}(b, b)", 20, 20.0, 180.0);
  TH1 *hist_matcheddRbb = new TH1F("h_matcheddRbb", "dR(b, b)", 20, 0, 4.0);
 
@@ -479,6 +479,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  {
    if(entry%1000 == 0 && entry < 10000) cout << "event number: " << entry << endl;
    else if(entry%10000 == 0) cout<< "event number: " << entry << endl;
+   if(entry == 10000) break;
    // Load selected branches with data from specified event
    treeReader->ReadEntry(entry);
    
@@ -491,144 +492,142 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    // dnn variables
    signal = -1;
    event = -1;
-   njets = 999;
-   nbjets = 999;
-   addbjet1_pt = 999;
+   addbjet1_pt = -1;
    addbjet1_eta = 999;
    addbjet1_phi = 999;
-   addbjet1_e = 999;
-   addbjet2_pt = 999;
+   addbjet1_e = -1;
+   addbjet2_pt = -1;
    addbjet2_eta = 999;
    addbjet2_phi = 999;
-   addbjet2_e = 999;
-   pt1 = 999;
+   addbjet2_e = -1;
+   pt1 = -1;
    eta1 = 999;
    phi1 = 999;
-   e1 = 999;
-   pt2 = 999;
+   e1 = -1;
+   pt2 = -1;
    eta2 = 999;
    phi2 = 999;
-   e2 = 999;
+   e2 = -1;
    bbdR = 999;
    bbdEta = 999;
    bbdPhi = 999;
-   bbPt = 999;
+   bbPt = -1;
    bbEta = 999;
    bbPhi = 999;
-   bbMass = 999;
-   bbHt = 999;
-   bbMt = 999;
+   bbMass = -1;
+   bbHt = -1;
+   bbMt = -1;
 
    nubbdR = 999;
    nubbdEta = 999;
    nubbdPhi = 999;
-   nubbPt = 999;
+   nubbPt = -1;
    nubbEta = 999;
    nubbPhi = 999;
-   nubbMass = 999;
-   nubbHt = 999;
-   nubbMt = 999;
+   nubbMass = -1;
+   nubbHt = -1;
+   nubbMt = -1;
    nub1dR = 999;
    nub1dEta = 999;
    nub1dPhi = 999;
-   nub1Pt = 999;
+   nub1Pt = -1;
    nub1Eta = 999;
    nub1Phi = 999;
-   nub1Mass = 999;
-   nub1Ht = 999;
-   nub1Mt = 999;
+   nub1Mass = -1;
+   nub1Ht = -1;
+   nub1Mt = -1;
    nub2dR = 999;
    nub2dEta = 999;
    nub2dPhi = 999;
-   nub2Pt = 999;
+   nub2Pt = -1;
    nub2Eta = 999;
    nub2Phi = 999;
-   nub2Mass = 999;
-   nub2Ht = 999;
-   nub2Mt = 999;
+   nub2Mass = -1;
+   nub2Ht = -1;
+   nub2Mt = -1;
 
    lbbdR = 999;
    lbbdEta = 999;
    lbbdPhi = 999;
-   lbbPt = 999;
+   lbbPt = -1;
    lbbEta = 999;
    lbbPhi = 999;
-   lbbMass = 999;
-   lbbHt = 999;
-   lbbMt = 999;
+   lbbMass = -1;
+   lbbHt = -1;
+   lbbMt = -1;
    lb1dR = 999;
    lb1dEta = 999;
    lb1dPhi = 999;
-   lb1Pt = 999;
+   lb1Pt = -1;
    lb1Eta = 999;
    lb1Phi = 999;
-   lb1Mass = 999;
-   lb1Ht = 999;
-   lb1Mt = 999;
+   lb1Mass = -1;
+   lb1Ht = -1;
+   lb1Mt = -1;
    lb2dR = 999;
    lb2dEta = 999;
    lb2dPhi = 999;
-   lb2Pt = 999;
+   lb2Pt = -1;
    lb2Eta = 999;
    lb2Phi = 999;
-   lb2Mass = 999;
-   lb2Ht = 999;
-   lb2Mt = 999;
+   lb2Mass = -1;
+   lb2Ht = -1;
+   lb2Mt = -1;
 
    Wjb1dR = 999;
    Wjb1dEta = 999;
    Wjb1dPhi = 999;
-   Wjb1Pt = 999;
+   Wjb1Pt = -1;
    Wjb1Eta = 999;
    Wjb1Phi = 999;
-   Wjb1Mass = 999;
-   Wjb1Ht = 999;
-   Wjb1Mt = 999;
+   Wjb1Mass = -1;
+   Wjb1Ht = -1;
+   Wjb1Mt = -1;
    Wjb2dR = 999;
    Wjb2dEta = 999;
    Wjb2dPhi = 999;
-   Wjb2Pt = 999;
+   Wjb2Pt = -1;
    Wjb2Eta = 999;
    Wjb2Phi = 999;
-   Wjb2Mass = 999;
-   Wjb2Ht = 999;
-   Wjb2Mt = 999;
+   Wjb2Mass = -1;
+   Wjb2Ht = -1;
+   Wjb2Mt = -1;
 
    // tree variables
-   Jet_pt = 999;
+   Jet_pt = -1;
    Jet_eta = 999;
    Jet_phi = 999;
-   Jet_e = 999;
-   Electron1_pt = 999;
+   Jet_e = -1;
+   Electron1_pt = -1;
    Electron1_eta = 999;
    Electron1_phi = 999;
-   Electron1_e = 999;
-   Electron2_pt = 999;
+   Electron1_e = -1;
+   Electron2_pt = -1;
    Electron2_eta = 999;
    Electron2_phi = 999;
-   Electron2_e = 999;
-   Muon1_pt = 999;
+   Electron2_e = -1;
+   Muon1_pt = -1;
    Muon1_eta = 999;
    Muon1_phi = 999;
-   Muon1_e = 999;
-   Muon2_pt = 999;
+   Muon1_e = -1;
+   Muon2_pt = -1;
    Muon2_eta = 999;
    Muon2_phi = 999;
-   Muon2_e = 999;
-   bjet1_pt = 999;
+   Muon2_e = -1;
+   bjet1_pt = -1;
    bjet1_eta = 999;
    bjet1_phi = 999;
-   bjet1_e = 999;
-   bjet2_pt = 999 ;
+   bjet1_e = -1;
+   bjet2_pt = -1 ;
    bjet2_eta = 999;
    bjet2_phi = 999;
-   bjet2_e = 999;
-   bjet3_pt = 999 ;
+   bjet2_e = -1;
+   bjet3_pt = -1 ;
    bjet3_eta = 999;
    bjet3_phi = 999;
-   bjet3_e = 999;
-   MET_px = 999;
-   MET_py = 999;
+   bjet3_e = -1;
+   MET_px = -1;
+   MET_py = -1;
    MATCHED = -1;
 
    //Genaddbjet Selection (S1)
@@ -699,7 +698,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    nElectron = 0;
    for(i = 0; i < branchElectron->GetEntries(); ++i){
      electron = (Electron*) branchElectron->At(i);
-     if( (electron->PT < 30) || (fabs(electron->Eta) > 2.5)) continue;
+     if( (electron->PT < 30) || (fabs(electron->Eta) > 2.4)) continue;
      nElectron++;
      Electrons.push_back(electron);
    }
@@ -707,7 +706,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    nMuon = 0;
    for(i = 0; i < branchMuon->GetEntries(); ++i){
      muon = (Muon*) branchMuon->At(i);
-     if( (muon->PT < 30) || (fabs(muon->Eta) > 2.5) ) continue;
+     if( (muon->PT < 30) || (fabs(muon->Eta) > 2.4) ) continue;
      nMuon++;
      Muons.push_back(muon);
    }
@@ -1004,6 +1003,12 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
        dnn_tree->Fill();
      }
    }
+
+   double matched_mbb = ( RecoAddJets[0] + RecoAddJets[1] ).M();
+   double matched_dRbb = RecoAddJets[0].DeltaR( RecoAddJets[1] ); 
+   hist_matchedMbb->Fill(matched_mbb);
+   hist_matcheddRbb->Fill(matched_dRbb);
+   
    hist_selection->SetBinContent(1,s1);
    hist_selection->SetBinContent(2,s2);
    hist_selection->SetBinContent(3,s3);
