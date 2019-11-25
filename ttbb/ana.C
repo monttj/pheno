@@ -226,17 +226,19 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  //DNN variables
  int signal, event;
  int njets, nbjets;
- double addbjet1_pt, addbjet1_eta, addbjet1_phi, addbjet1_e;//AddGen bjet1
- double addbjet2_pt, addbjet2_eta, addbjet2_phi, addbjet2_e;//AddGen bjet2
- double pt1, eta1, phi1, e1;//Reco bjet1
- double pt2, eta2, phi2, e2;//Reco bjet2 
- double bbdR, bbdEta, bbdPhi, bbPt, bbEta, bbMass;
- double nubbdR, nubbdEta, nubbdPhi, nubbPt, nubbMass, nubbHt;
- double lbbdR, lbbdEta, lbbdPhi, lbbPt, lbbEta, lbbMass;
- double nub1dR, nub1dEta, nub1dPhi, nub1Mass;
- double nub2dR, nub2dEta, nub2dPhi, nub2Mass, nub2Ht;
- double lb1dR, lb1dEta, lb1dPhi, lb1Pt, lb1Eta, lb1Mass, lb1Ht;
- double lb2dR, lb2dEta, lb2dPhi, lb2Pt, lb2Eta, lb2Mass, lb2Ht;
+ double addbjet1_pt, addbjet1_eta, addbjet1_phi, addbjet1_e;
+ double addbjet2_pt, addbjet2_eta, addbjet2_phi, addbjet2_e;
+ double pt1, eta1, phi1, e1;
+ double pt2, eta2, phi2, e2;
+ double bbdR, bbdEta, bbdPhi, bbPt, bbEta, bbPhi, bbMass, bbHt, bbMt;
+ double nubbdR, nubbdEta, nubbdPhi, nubbPt, nubbEta, nubbPhi, nubbMass, nubbHt, nubbMt;
+ double lbbdR, lbbdEta, lbbdPhi, lbbPt, lbbEta, lbbPhi, lbbMass, lbbHt, lbbMt;
+ double Wjb1dR, Wjb1dEta, Wjb1dPhi, Wjb1Pt, Wjb1Eta, Wjb1Phi, Wjb1Mass, Wjb1Ht, Wjb1Mt;
+ double Wjb2dR, Wjb2dEta, Wjb2dPhi, Wjb2Pt, Wjb2Eta, Wjb2Phi, Wjb2Mass, Wjb2Ht, Wjb2Mt;
+ double nub1dR, nub1dEta, nub1dPhi, nub1Pt, nub1Eta, nub1Phi, nub1Mass, nub1Ht, nub1Mt;
+ double nub2dR, nub2dEta, nub2dPhi, nub2Pt, nub2Eta, nub2Phi, nub2Mass, nub2Ht, nub2Mt;
+ double lb1dR, lb1dEta, lb1dPhi, lb1Pt, lb1Eta, lb1Phi, lb1Mass, lb1Ht, lb1Mt;
+ double lb2dR, lb2dEta, lb2dPhi, lb2Pt, lb2Eta, lb2Phi, lb2Mass, lb2Ht, lb2Mt;
  
  //Tree variables ( minimum deltaR )
  double bjet1_pt;
@@ -252,15 +254,18 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  double bjet3_phi;
  double bjet3_e;
 
- unsigned short nJet, nbJet, nMuon, nElectron, nLepton;
+ unsigned short nMuon, nElectron, nLepton;
  double Jet_pt, Jet_eta, Jet_phi, Jet_e;
  double Electron1_pt, Electron1_eta, Electron1_phi, Electron1_e;
  double Electron2_pt, Electron2_eta, Electron2_phi, Electron2_e;
  double Muon1_pt, Muon1_eta, Muon1_phi, Muon1_e;
  double Muon2_pt, Muon2_eta, Muon2_phi, Muon2_e;
+ double MET_px, MET_py;
  int MATCHED;
  // Selected Events (Cut Flow)
- int s1, s2, s3;
+ int s1 = 0;
+ int s2 = 0;
+ int s3 = 0;
 
  //Tree for Deep learning input 
  TTree * dnn_tree = new TTree( "dnn_input", "tree for dnn");
@@ -291,52 +296,91 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  dnn_tree->Branch("bbdPhi",&bbdPhi,"bbdPhi/d");
  dnn_tree->Branch("bbPt",&bbPt,"bbPt/d");
  dnn_tree->Branch("bbEta",&bbEta,"bbEta/d");
+ dnn_tree->Branch("bbPhi",&bbPhi,"bbPhi/d");
  dnn_tree->Branch("bbMass",&bbMass,"bbMass/d");
- 
+ dnn_tree->Branch("bbHt",&bbHt,"bbHt/d");
+ dnn_tree->Branch("bbMt",&bbMt,"bbMt/d");
+
  dnn_tree->Branch("nubbdR",&nubbdR,"nubbdR/d");
  dnn_tree->Branch("nubbdEta",&nubbdEta,"nubbdEta/d");
  dnn_tree->Branch("nubbdPhi",&nubbdPhi,"nubbdPhi/d");
  dnn_tree->Branch("nubbPt",&nubbPt,"nubbPt/d");
+ dnn_tree->Branch("nubbEta",&nubbEta,"nubbEta/d");
+ dnn_tree->Branch("nubbPhi",&nubbPhi,"nubbPhi/d");
  dnn_tree->Branch("nubbMass",&nubbMass,"nubbMass/d");
  dnn_tree->Branch("nubbHt",&nubbHt,"nubbHt/d");
- 
+ dnn_tree->Branch("nubbMt",&nubbMt,"nubbMt/d");
+
+ dnn_tree->Branch("nub1dR",&nub1dR,"nub1dR/d");
+ dnn_tree->Branch("nub1dEta",&nub1dEta,"nub1dEta/d");
+ dnn_tree->Branch("nub1dPhi",&nub1dPhi,"nub1dPhi/d");
+ dnn_tree->Branch("nub1Pt",&nub1Pt,"nub1Pt/d");
+ dnn_tree->Branch("nub1Eta",&nub1Eta,"nub1Eta/d");
+ dnn_tree->Branch("nub1Phi",&nub1Phi,"nub1Phi/d");
+ dnn_tree->Branch("nub1Mass",&nub1Mass,"nub1Mass/d");
+ dnn_tree->Branch("nub1Ht",&nub1Ht,"nub1Ht/d");
+ dnn_tree->Branch("nub1Mt",&nub1Mt,"nub1Mt/d");
+ dnn_tree->Branch("nub2dR",&nub2dR,"nub2dR/d");
+ dnn_tree->Branch("nub2dEta",&nub2dEta,"nub2dEta/d");
+ dnn_tree->Branch("nub2dPhi",&nub2dPhi,"nub2dPhi/d");
+ dnn_tree->Branch("nub2Pt",&nub2Pt,"nub2Pt/d");
+ dnn_tree->Branch("nub2Eta",&nub2Eta,"nub2Eta/d");
+ dnn_tree->Branch("nub2Phi",&nub2Phi,"nub2Phi/d");
+ dnn_tree->Branch("nub2Mass",&nub2Mass,"nub2Mass/d");
+ dnn_tree->Branch("nub2Ht",&nub2Ht,"nub2Ht/d");
+ dnn_tree->Branch("nub2Mt",&nub2Mt,"nub2Mt/d");
+
  dnn_tree->Branch("lbbdR",&lbbdR,"lbbdR/d");
  dnn_tree->Branch("lbbdEta",&lbbdEta,"lbbdEta/d");
  dnn_tree->Branch("lbbdPhi",&lbbdPhi,"lbbdPhi/d");
  dnn_tree->Branch("lbbPt",&lbbPt,"lbbPt/d");
  dnn_tree->Branch("lbbEta",&lbbEta,"lbbEta/d");
+ dnn_tree->Branch("lbbPhi",&lbbPhi,"lbbPhi/d");
  dnn_tree->Branch("lbbMass",&lbbMass,"lbbMass/d");
- 
- dnn_tree->Branch("nub1dR",&nub1dR,"nub1dR/d");
- dnn_tree->Branch("nub1dEta",&nub1dEta,"nub1dEta/d");
- dnn_tree->Branch("nub1dPhi",&nub1dPhi,"nub1dPhi/d");
- dnn_tree->Branch("nub1Mass",&nub1Mass,"nub1Mass/d");
- 
- dnn_tree->Branch("nub2dR",&nub2dR,"nub2dR/d");
- dnn_tree->Branch("nub2dEta",&nub2dEta,"nub2dEta/d");
- dnn_tree->Branch("nub2dPhi",&nub2dPhi,"nub2dPhi/d");
- dnn_tree->Branch("nub2Mass",&nub2Mass,"nub2Mass/d");
- dnn_tree->Branch("nub2Ht",&nub2Ht,"nub2Ht/d");
- 
+ dnn_tree->Branch("lbbHt",&lbbHt,"lbbHt/d");
+ dnn_tree->Branch("lbbMt",&lbbMt,"lbbMt/d");
+
  dnn_tree->Branch("lb1dR",&lb1dR,"lb1dR/d");
  dnn_tree->Branch("lb1dEta",&lb1dEta,"lb1dEta/d");
  dnn_tree->Branch("lb1dPhi",&lb1dPhi,"lb1dPhi/d");
  dnn_tree->Branch("lb1Pt",&lb1Pt,"lb1Pt/d");
  dnn_tree->Branch("lb1Eta",&lb1Eta,"lb1Eta/d");
+ dnn_tree->Branch("lb1Phi",&lb1Phi,"lb1Phi/d");
  dnn_tree->Branch("lb1Mass",&lb1Mass,"lb1Mass/d");
  dnn_tree->Branch("lb1Ht",&lb1Ht,"lb1Ht/d");
- 
+ dnn_tree->Branch("lb1Mt",&lb1Mt,"lb1Mt/d");
  dnn_tree->Branch("lb2dR",&lb2dR,"lb2dR/d");
  dnn_tree->Branch("lb2dEta",&lb2dEta,"lb2dEta/d");
  dnn_tree->Branch("lb2dPhi",&lb2dPhi,"lb2dPhi/d");
  dnn_tree->Branch("lb2Pt",&lb2Pt,"lb2Pt/d");
  dnn_tree->Branch("lb2Eta",&lb2Eta,"lb2Eta/d");
+ dnn_tree->Branch("lb2Phi",&lb2Phi,"lb2Phi/d");
  dnn_tree->Branch("lb2Mass",&lb2Mass,"lb2Mass/d");
  dnn_tree->Branch("lb2Ht",&lb2Ht,"lb2Ht/d");
- 
+ dnn_tree->Branch("lb2Mt",&lb2Mt,"lb2Mt/d");
+
+ dnn_tree->Branch("Wjb1dR",&Wjb1dR,"Wjb1dR/d");
+ dnn_tree->Branch("Wjb1dEta",&Wjb1dEta,"Wjb1dEta/d");
+ dnn_tree->Branch("Wjb1dPhi",&Wjb1dPhi,"Wjb1dPhi/d");
+ dnn_tree->Branch("Wjb1Pt",&Wjb1Pt,"Wjb1Pt/d");
+ dnn_tree->Branch("Wjb1Eta",&Wjb1Eta,"Wjb1Eta/d");
+ dnn_tree->Branch("Wjb1Phi",&Wjb1Phi,"Wjb1Phi/d");
+ dnn_tree->Branch("Wjb1Mass",&Wjb1Mass,"Wjb1Mass/d");
+ dnn_tree->Branch("Wjb1Ht",&Wjb1Ht,"Wjb1Ht/d");
+ dnn_tree->Branch("Wjb1Mt",&Wjb1Mt,"Wjb1Mt/d");
+ dnn_tree->Branch("Wjb2dR",&Wjb2dR,"Wjb2dR/d");
+ dnn_tree->Branch("Wjb2dEta",&Wjb2dEta,"Wjb2dEta/d");
+ dnn_tree->Branch("Wjb2dPhi",&Wjb2dPhi,"Wjb2dPhi/d");
+ dnn_tree->Branch("Wjb2Pt",&Wjb2Pt,"Wjb2Pt/d");
+ dnn_tree->Branch("Wjb2Eta",&Wjb2Eta,"Wjb2Eta/d");
+ dnn_tree->Branch("Wjb2Phi",&Wjb2Phi,"Wjb2Phi/d");
+ dnn_tree->Branch("Wjb2Mass",&Wjb2Mass,"Wjb2Mass/d");
+ dnn_tree->Branch("Wjb2Ht",&Wjb2Ht,"Wjb2Ht/d");
+ dnn_tree->Branch("Wjb2Mt",&Wjb2Mt,"Wjb2Mt/d");
+
  //Tree for minimum dR analysis
  TTree * tree = new TTree( "tree", "tree for ttbb");
- tree->Branch("nbJet",&nbJet,"nbJet/s");
+ tree->Branch("nbjets",&nbjets,"nbjets/s");
  tree->Branch("bjet1_pt",&bjet1_pt,"bjet1_pt/d");
  tree->Branch("bjet1_eta",&bjet1_eta,"bjet1_eta/d");
  tree->Branch("bjet1_phi",&bjet1_phi,"bjet1_phi/d");
@@ -350,7 +394,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  tree->Branch("bjet3_phi",&bjet3_phi,"bjet3_phi/d");
  tree->Branch("bjet3_e",&bjet3_e,"bjet3_e/d");
 
- tree->Branch("nJet",&nJet,"nJet/s");
+ tree->Branch("njets",&njets,"njets/s");
  tree->Branch("Jet_pt",&Jet_pt,"Jet_pt/d");
  tree->Branch("Jet_eta",&Jet_eta,"Jet_eta/d");
  tree->Branch("Jet_phi",&Jet_phi,"Jet_phi/d");
@@ -376,13 +420,11 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  tree->Branch("Muon2_phi",&Muon2_phi,"Muon2_phi/d");
  tree->Branch("Muon2_e",&Muon2_e,"Muon2_e/d");
 
+ tree->Branch("MET_px",&MET_px,"MET_px/d");
+ tree->Branch("MET_py",&MET_py,"MET_py/d");
  tree->Branch("nLepton",&nLepton,"nLepton/s");
  tree->Branch("MATCHED",&MATCHED,"MATCHED/i");
  
- tree->Branch("s1",&s1,"s1/i");
- tree->Branch("s2",&s2,"s2/i");
- tree->Branch("s3",&s3,"s3/i");
-
  // Create object of class ExRootTreeReader
  ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
  Long64_t numberOfEntries = treeReader->GetEntries();
@@ -408,9 +450,11 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  TH1 *hist_genMbb = new TH1F("h_genmbb", "M_{inv}(b, b)", 20, 20.0, 180.0);
  TH1 *hist_gendRbb = new TH1F("h_gendRbb", "dR(b, b)", 20, 0, 4.0);
 
- TH1 *hist_matchednbjet = new TH1F("h_matchednbjet", "Number of b-jets", 6, 0.0, 6.0);
+ //TH1 *hist_matchednbjet = new TH1F("h_matchednbjet", "Number of b-jets", 6, 0.0, 6.0);
  TH1 *hist_matchedMbb = new TH1F("h_matchedmbb", "M_{inv}(b, b)", 20, 20.0, 180.0);
  TH1 *hist_matcheddRbb = new TH1F("h_matcheddRbb", "dR(b, b)", 20, 0, 4.0);
+
+ TH1 *hist_selection = new TH1F("h_selection","Selection",3,0.0,3.0);
 
  Int_t numberOfSelectedEvents = 0;
  Int_t numberOfMatchedEvents = 0;
@@ -435,6 +479,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
  {
    if(entry%1000 == 0 && entry < 10000) cout << "event number: " << entry << endl;
    else if(entry%10000 == 0) cout<< "event number: " << entry << endl;
+   if(entry == 10000) break;
    // Load selected branches with data from specified event
    treeReader->ReadEntry(entry);
    
@@ -447,102 +492,143 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    // dnn variables
    signal = -1;
    event = -1;
-   njets = 999;
-   nbjets = 999;
-   addbjet1_pt = 999;
+   addbjet1_pt = -1;
    addbjet1_eta = 999;
    addbjet1_phi = 999;
-   addbjet1_e = 999;
-   addbjet2_pt = 999;
+   addbjet1_e = -1;
+   addbjet2_pt = -1;
    addbjet2_eta = 999;
    addbjet2_phi = 999;
-   addbjet2_e = 999;
-   pt1 = 999;
+   addbjet2_e = -1;
+   pt1 = -1;
    eta1 = 999;
    phi1 = 999;
-   e1 = 999;
-   pt2 = 999;
+   e1 = -1;
+   pt2 = -1;
    eta2 = 999;
    phi2 = 999;
-   e2 = 999;
+   e2 = -1;
    bbdR = 999;
    bbdEta = 999;
    bbdPhi = 999;
-   bbPt = 999;
+   bbPt = -1;
    bbEta = 999;
-   bbMass = 999;
+   bbPhi = 999;
+   bbMass = -1;
+   bbHt = -1;
+   bbMt = -1;
+
    nubbdR = 999;
    nubbdEta = 999;
    nubbdPhi = 999;
-   nubbPt = 999;
-   nubbMass = 999;
-   nubbHt = 999;
-   lbbdR = 999;
-   lbbdEta = 999;
-   lbbdPhi = 999;
-   lbbPt = 999;
-   lbbEta = 999;
-   lbbMass = 999;
+   nubbPt = -1;
+   nubbEta = 999;
+   nubbPhi = 999;
+   nubbMass = -1;
+   nubbHt = -1;
+   nubbMt = -1;
    nub1dR = 999;
    nub1dEta = 999;
    nub1dPhi = 999;
-   nub1Mass = 999;
+   nub1Pt = -1;
+   nub1Eta = 999;
+   nub1Phi = 999;
+   nub1Mass = -1;
+   nub1Ht = -1;
+   nub1Mt = -1;
    nub2dR = 999;
    nub2dEta = 999;
    nub2dPhi = 999;
-   nub2Mass = 999;
-   nub2Ht = 999;
+   nub2Pt = -1;
+   nub2Eta = 999;
+   nub2Phi = 999;
+   nub2Mass = -1;
+   nub2Ht = -1;
+   nub2Mt = -1;
+
+   lbbdR = 999;
+   lbbdEta = 999;
+   lbbdPhi = 999;
+   lbbPt = -1;
+   lbbEta = 999;
+   lbbPhi = 999;
+   lbbMass = -1;
+   lbbHt = -1;
+   lbbMt = -1;
    lb1dR = 999;
    lb1dEta = 999;
    lb1dPhi = 999;
-   lb1Pt = 999;
+   lb1Pt = -1;
    lb1Eta = 999;
-   lb1Mass = 999;
-   lb1Ht = 999;
+   lb1Phi = 999;
+   lb1Mass = -1;
+   lb1Ht = -1;
+   lb1Mt = -1;
    lb2dR = 999;
    lb2dEta = 999;
    lb2dPhi = 999;
-   lb2Pt = 999;
+   lb2Pt = -1;
    lb2Eta = 999;
-   lb2Mass = 999;
-   lb2Ht = 999;
+   lb2Phi = 999;
+   lb2Mass = -1;
+   lb2Ht = -1;
+   lb2Mt = -1;
+
+   Wjb1dR = 999;
+   Wjb1dEta = 999;
+   Wjb1dPhi = 999;
+   Wjb1Pt = -1;
+   Wjb1Eta = 999;
+   Wjb1Phi = 999;
+   Wjb1Mass = -1;
+   Wjb1Ht = -1;
+   Wjb1Mt = -1;
+   Wjb2dR = 999;
+   Wjb2dEta = 999;
+   Wjb2dPhi = 999;
+   Wjb2Pt = -1;
+   Wjb2Eta = 999;
+   Wjb2Phi = 999;
+   Wjb2Mass = -1;
+   Wjb2Ht = -1;
+   Wjb2Mt = -1;
+
    // tree variables
-   Jet_pt = 999;
+   Jet_pt = -1;
    Jet_eta = 999;
    Jet_phi = 999;
-   Jet_e = 999;
-   Electron1_pt = 999;
+   Jet_e = -1;
+   Electron1_pt = -1;
    Electron1_eta = 999;
    Electron1_phi = 999;
-   Electron1_e = 999;
-   Electron2_pt = 999;
+   Electron1_e = -1;
+   Electron2_pt = -1;
    Electron2_eta = 999;
    Electron2_phi = 999;
-   Electron2_e = 999;
-   Muon1_pt = 999;
+   Electron2_e = -1;
+   Muon1_pt = -1;
    Muon1_eta = 999;
    Muon1_phi = 999;
-   Muon1_e = 999;
-   Muon2_pt = 999;
+   Muon1_e = -1;
+   Muon2_pt = -1;
    Muon2_eta = 999;
    Muon2_phi = 999;
-   Muon2_e = 999;
-   bjet1_pt = 999;
+   Muon2_e = -1;
+   bjet1_pt = -1;
    bjet1_eta = 999;
    bjet1_phi = 999;
-   bjet1_e = 999;
-   bjet2_pt = 999 ;
+   bjet1_e = -1;
+   bjet2_pt = -1 ;
    bjet2_eta = 999;
    bjet2_phi = 999;
-   bjet2_e = 999;
-   bjet3_pt = 999 ;
+   bjet2_e = -1;
+   bjet3_pt = -1 ;
    bjet3_eta = 999;
    bjet3_phi = 999;
-   bjet3_e = 999;
+   bjet3_e = -1;
+   MET_px = -1;
+   MET_py = -1;
    MATCHED = -1;
-   s1 = 0;
-   s2 = 0;
-   s3 = 0;
 
    //Genaddbjet Selection (S1)
    int nb = 0;
@@ -612,7 +698,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    nElectron = 0;
    for(i = 0; i < branchElectron->GetEntries(); ++i){
      electron = (Electron*) branchElectron->At(i);
-     if( (electron->PT < 30) || (fabs(electron->Eta) > 2.5)) continue;
+     if( (electron->PT < 30) || (fabs(electron->Eta) > 2.4)) continue;
      nElectron++;
      Electrons.push_back(electron);
    }
@@ -620,7 +706,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    nMuon = 0;
    for(i = 0; i < branchMuon->GetEntries(); ++i){
      muon = (Muon*) branchMuon->At(i);
-     if( (muon->PT < 30) || (fabs(muon->Eta) > 2.5) ) continue;
+     if( (muon->PT < 30) || (fabs(muon->Eta) > 2.4) ) continue;
      nMuon++;
      Muons.push_back(muon);
    }
@@ -635,29 +721,39 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
    s2++;
 
    // Jet and b-tag Selections (S3)
-   nJet = 0;
-   nbJet = 0;
+   njets = 0;
+   nbjets = 0;
    for(i = 0; i < branchJet->GetEntriesFast(); ++i){
      jet = (Jet*) branchJet->At(i);
      if( (jet->PT < 30) || (fabs(jet->Eta) > 2.5) ) continue;
-     nJet++;
+     njets++;
      Jets.push_back(jet);
      if( jet->BTag ) {
-       nbJet++;
+       nbjets++;
        bJets.push_back(jet);
      }
    }
-   if ( nJet < jcut || nbJet < bcut ) continue;   // S3
+   if ( njets < jcut || nbjets < bcut ) continue;   // S3
    s3++;
-   //cout<<"njet "<<nJet<<" nbjet "<<nbJet<<" nlepton "<<nLepton<<endl;
+   //cout<<"njet "<<njets<<" nbjet "<<nbjets<<" nlepton "<<nLepton<<endl;
 
-   // MissingET 4-vector
    TLorentzVector nu;
    if( branchMissingET->GetEntriesFast() > 0){
      met = (MissingET*) branchMissingET->At(0);
+     MET_px = met->MET * cos( met->Phi);
+     MET_py = met->MET * sin( met->Phi);
      //cout << "px " << MET_px <<" py "<< MET_py<<" MET "<<met->MET<<endl;
-     nu = met->P4();
+     nu.SetPxPyPzE( MET_px, MET_py, 0, met->MET );
    }
+
+   // MissingET 4-vector
+   //TLorentzVector nu;
+   //if( branchMissingET->GetEntriesFast() > 0){
+   //  met = (MissingET*) branchMissingET->At(0);
+     //cout << "px " << MET_px <<" py "<< MET_py<<" MET "<<met->MET<<endl;
+     
+     //nu = met->P4();
+   //}
 
    //Lepton 4-vector ( only for lep+jet )
    TLorentzVector lep;
@@ -713,7 +809,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
      bjet3_e = bJets[2]->P4().E();
    }
    
-   histnjet->Fill( nJet );
+   histnjet->Fill( njets );
    histnElectron->Fill( nElectron );
    histnMuon->Fill( nMuon );
 
@@ -747,6 +843,25 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
      hist_matchedMbb->Fill(matched_mbb);
      hist_matcheddRbb->Fill(matched_dRbb);
    }*/
+   
+   //Jet Combination
+   TLorentzVector Wj;
+   TLorentzVector tmpWj;
+   double tmpWjM = -1;
+   for(int j1 = 0; j1 < njets-1; j1++) {
+     if(Jets[j1]->BTag) continue;
+     TLorentzVector jet1 = Jets[j1]->P4();
+     for(int j2 = j1+1; j2 < njets; j2++) {
+       if(Jets[j2]->BTag) continue;
+       TLorentzVector jet2 = Jets[j2]->P4();
+
+       tmpWj = jet1 + jet2;
+       if( abs(tmpWj.M() - 80.2 ) < tmpWjM ) {
+         Wj = tmpWj;
+         tmpWjM = tmpWj.M();
+       }
+     }
+   }//Jet combi
 
    float mbb = 999;
    float dRbb = 999;
@@ -779,9 +894,6 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
 
        event = entry;
 
-       njets = nJet;
-       nbjets = nbJet;
-
        pt1 = p4[0].Pt();
        eta1 = p4[0].Eta();
        phi1 = p4[0].Phi();
@@ -800,57 +912,112 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut)
        addbjet2_phi = addbjet[1].Phi();
        addbjet2_e = addbjet[1].E();
 
-       bbdR = p4[0].DeltaR(p4[1]);
+       bbdR = tmp_dRbb;
        bbdEta = abs(p4[0].Eta()-p4[1].Eta());
        bbdPhi = p4[0].DeltaPhi(p4[1]);
        bbPt = (p4[0]+p4[1]).Pt();
        bbEta = (p4[0]+p4[1]).Eta();
-       bbMass = (p4[0]+p4[1]).M();
+       bbPhi = (p4[0]+p4[1]).Phi();
+       bbMass = tmp_mbb;
+       bbHt = p4[0].Pt()+p4[1].Pt();
+       bbMt = (p4[0]+p4[1]).Mt();
+
        nubbdR = (p4[0]+p4[1]).DeltaR(nu);
        nubbdEta = abs((p4[0]+p4[1]).Eta()-nu.Eta());
        nubbdPhi = (p4[0]+p4[1]).DeltaPhi(nu);
        nubbPt = (p4[0]+p4[1]+nu).Pt();
+       nubbEta = (p4[0]+p4[1]+nu).Eta();
+       nubbPhi = (p4[0]+p4[1]+nu).Phi();
        nubbMass = (p4[0]+p4[1]+nu).M();
        nubbHt = (p4[0]+p4[1]).Pt()+nu.Pt();
-       lbbdR = (p4[0]+p4[1]).DeltaR(lep) ;
+       nubbMt = (p4[0]+p4[1]+nu).Mt();
+
+       nub1dR = p4[0].DeltaR(nu);
+       nub1dEta = abs(p4[0].Eta()-nu.Eta());
+       nub1dPhi = p4[0].DeltaPhi(nu);
+       nub1Pt = (p4[0]+nu).Pt();
+       nub1Eta = (p4[0]+nu).Eta();
+       nub1Phi = (p4[0]+nu).Phi();
+       nub1Mass = (p4[0]+nu).M();
+       nub1Ht = p4[0].Pt()+nu.Pt();
+       nub1Mt = (p4[0]+nu).Mt();
+
+       nub2dR = p4[1].DeltaR(nu);
+       nub2dEta = abs(p4[1].Eta()-nu.Eta());
+       nub2dPhi = p4[1].DeltaPhi(nu);
+       nub2Pt = (p4[1]+nu).Pt();
+       nub2Eta = (p4[1]+nu).Eta();
+       nub2Phi = (p4[1]+nu).Phi();
+       nub2Mass = (p4[1]+nu).M();
+       nub2Ht = p4[1].Pt()+nu.Pt();
+       nub2Mt = (p4[1]+nu).Mt();
+
+       lbbdR = (p4[0]+p4[1]).DeltaR(lep);
        lbbdEta = abs((p4[0]+p4[1]).Eta()-lep.Eta());
        lbbdPhi = (p4[0]+p4[1]).DeltaPhi(lep);
        lbbPt = (p4[0]+p4[1]+lep).Pt();
        lbbEta = (p4[0]+p4[1]+lep).Eta();
+       lbbPhi = (p4[0]+p4[1]+lep).Phi();
        lbbMass = (p4[0]+p4[1]+lep).M();
-       nub1dR = p4[0].DeltaR(nu);
-       nub1dEta = abs(p4[0].Eta()-nu.Eta());
-       nub1dPhi = p4[0].DeltaPhi(nu);
-       nub1Mass = (p4[0]+nu).M();
-       nub2dR = p4[1].DeltaR(nu);
-       nub2dEta = abs(p4[1].Eta()-nu.Eta());
-       nub2dPhi = p4[1].DeltaPhi(nu);
-       nub2Mass = (p4[1]+nu).M();
-       nub2Ht = p4[1].Pt()+nu.Pt();
+       lbbHt = (p4[0]+p4[1]).Pt()+lep.Pt();
+       lbbMt = (p4[0]+p4[1]+lep).Mt();
+
        lb1dR = p4[0].DeltaR(lep);
        lb1dEta = abs(p4[0].Eta()-lep.Eta());
        lb1dPhi = p4[0].DeltaPhi(lep);
        lb1Pt = (p4[0]+lep).Pt();
        lb1Eta = (p4[0]+lep).Eta();
+       lb1Phi = (p4[0]+lep).Phi();
        lb1Mass = (p4[0]+lep).M();
        lb1Ht = p4[0].Pt()+lep.Pt();
+       lb1Mt = (p4[0]+lep).Mt();
        lb2dR = p4[1].DeltaR(lep);
        lb2dEta = abs(p4[1].Eta()-lep.Eta());
        lb2dPhi = p4[1].DeltaPhi(lep);
        lb2Pt = (p4[1]+lep).Pt();
        lb2Eta = (p4[1]+lep).Eta();
+       lb2Phi = (p4[1]+lep).Phi();
        lb2Mass = (p4[1]+lep).M();
        lb2Ht = p4[1].Pt()+lep.Pt();
-       
+       lb2Mt = (p4[1]+lep).Mt();
+
+       Wjb1dR = p4[0].DeltaR(Wj);
+       Wjb1dEta = abs(p4[0].Eta()-Wj.Eta());
+       Wjb1dPhi = p4[0].DeltaPhi(Wj);
+       Wjb1Pt = (p4[0]+Wj).Pt();
+       Wjb1Eta = (p4[0]+Wj).Eta();
+       Wjb1Phi = (p4[0]+Wj).Phi();
+       Wjb1Mass = (p4[0]+Wj).M();
+       Wjb1Ht = p4[0].Pt()+Wj.Pt();
+       Wjb1Mt = (p4[0]+Wj).Mt();
+       Wjb2dR = p4[1].DeltaR(Wj);
+       Wjb2dEta = abs(p4[1].Eta()-Wj.Eta());
+       Wjb2dPhi = p4[1].DeltaPhi(Wj);
+       Wjb2Pt = (p4[1]+Wj).Pt();
+       Wjb2Eta = (p4[1]+Wj).Eta();
+       Wjb2Phi = (p4[1]+Wj).Phi();
+       Wjb2Mass = (p4[1]+Wj).M();
+       Wjb2Ht = p4[1].Pt()+Wj.Pt();
+       Wjb2Mt = (p4[1]+Wj).Mt();
+
        dnn_tree->Fill();
      }
    }
+
+   double matched_mbb = ( RecoAddJets[0] + RecoAddJets[1] ).M();
+   double matched_dRbb = RecoAddJets[0].DeltaR( RecoAddJets[1] ); 
+   hist_matchedMbb->Fill(matched_mbb);
+   hist_matcheddRbb->Fill(matched_dRbb);
+   
+   hist_selection->SetBinContent(1,s1);
+   hist_selection->SetBinContent(2,s2);
+   hist_selection->SetBinContent(3,s3);
 
    bool matched = false;
    bool matched1 = ( RecoAddJets[0].DeltaR( addbjet[0] ) < 0.4 ) && ( RecoAddJets[1].DeltaR( addbjet[1] ) < 0.4 );
    bool matched2 = ( RecoAddJets[0].DeltaR( addbjet[1] ) < 0.4 ) && ( RecoAddJets[1].DeltaR( addbjet[0] ) < 0.4 );
    if ( matched1 || matched2 ) matched = true;
-   //cout<<"nElectron = "<< nElectron <<" nMuon = "<< nMuon <<" nJet = "<< nJet <<" nbJet = "<< nbJet << endl;
+   //cout<<"nElectron = "<< nElectron <<" nMuon = "<< nMuon <<" njets = "<< njets <<" nbjets = "<< nbjets << endl;
 
    ++numberOfSelectedEvents;
    if(matched) {
