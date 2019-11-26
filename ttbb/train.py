@@ -55,7 +55,7 @@ import utils as ut
 import time
 import pickle
 
-trainInput = "/home/ljw1015/deepCSV_var89_f1/deepCSV_4f_lj_"+name+".h5"
+trainInput = "/home/ljw1015/deepCSV_var89/deepCSV_4f_lj_"+name+".h5"
 ver = "/20191014_var79/"+name+additionalname+"/node"+str(a)+"layer"+str(layers)
 configDir = ""
 weightDir = ""
