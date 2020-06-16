@@ -9,12 +9,6 @@ R__LOAD_LIBRARY(libDelphes)
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
 #endif
 #include <vector>
-// KLFitter includes
-#include "KLFitter/DetectorSnowmass.h"
-#include "KLFitter/Fitter.h"
-#include "KLFitter/LikelihoodTopLeptonJets.h"
-#include "KLFitter/Permutations.h"
-#include "KLFitter/PhysicsConstants.h"
 
 GenParticle* MotherParticle(const GenParticle* p, const TClonesArray* branchParticle, int i = 0){
 
