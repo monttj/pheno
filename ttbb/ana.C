@@ -906,7 +906,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
        tmpWj = jet1 + jet2;
        if( abs(tmpWj.M() - 80.2 ) < tmpWjM ) {
          Wj = tmpWj;
-         tmpWjM = tmpWj.M() - 80.2;
+         tmpWjM = abs(tmpWj.M() - 80.2);
        }
      }
    }//Jet combi
