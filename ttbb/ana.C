@@ -227,6 +227,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
  //DNN variables
  int signal, event;
  int njets, nbjets;
+ float chi2;
  float addbjet1_pt, addbjet1_eta, addbjet1_phi, addbjet1_e;
  float addbjet2_pt, addbjet2_eta, addbjet2_phi, addbjet2_e;
  float pt1, eta1, phi1, e1;
@@ -240,18 +241,6 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
  float nub2dR, nub2dEta, nub2dPhi, nub2Pt, nub2Eta, nub2Phi, nub2Mass, nub2Ht, nub2Mt;
  float lb1dR, lb1dEta, lb1dPhi, lb1Pt, lb1Eta, lb1Phi, lb1Mass, lb1Ht, lb1Mt;
  float lb2dR, lb2dEta, lb2dPhi, lb2Pt, lb2Eta, lb2Phi, lb2Mass, lb2Ht, lb2Mt;
-
- //KLFitter variables
- float lepton_pt, lepton_eta, lepton_cl_eta, lepton_phi, lepton_e;
- float met_met, met_phi;
- float sumet;
- unsigned char lepton_is_e, lepton_is_mu;
- vector<float> jet_pt;
- vector<float> jet_eta;
- vector<float> jet_phi;
- vector<float> jet_e;
- vector<float> jet_btag_weight;
- vector<char> jet_has_btag;
 
  //Tree variables ( minimum deltaR )
  float bjet1_pt;
@@ -275,6 +264,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
  float Muon2_pt, Muon2_eta, Muon2_phi, Muon2_e;
  float MET_px, MET_py;
  int MATCHED;
+ 
  // Selected Events (Cut Flow)
  int s1 = 0;
  int s2 = 0;
@@ -287,6 +277,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
  dnn_tree->Branch("event",&event,"event/i");
  dnn_tree->Branch("njets",&njets,"njets/i");
  dnn_tree->Branch("nbjets",&nbjets,"nbjets/i"); 
+ dnn_tree->Branch("chi2",&chi2,"chi2/f"); 
  dnn_tree->Branch("addbjet1_pt",&addbjet1_pt,"addbjet1_pt/f");
  dnn_tree->Branch("addbjet1_eta",&addbjet1_eta,"addbjet1_eta/f");
  dnn_tree->Branch("addbjet1_phi",&addbjet1_phi,"addbjet1_phi/f");
@@ -510,6 +501,7 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
    // dnn variables
    signal = -1;
    event = -1;
+   chi2 = -1;
    addbjet1_pt = -9999;
    addbjet1_eta = -9999;
    addbjet1_phi = -9999;
@@ -610,18 +602,6 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
    Wjb2Mass = -9999;
    Wjb2Ht = -9999;
    Wjb2Mt = -9999;
-
-   // KLFitter variables
-   lepton_pt = -9999;
-   lepton_eta = -9999;
-   lepton_cl_eta = -9999;
-   lepton_phi = -9999;
-   lepton_e = -9999;
-   met_met = -9999;
-   met_phi = -9999;
-   sumet = -9999;
-   lepton_is_e = 0;
-   lepton_is_mu = 0;
 
    // tree variables
    Jet_pt = -9999;
@@ -750,22 +730,6 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
    }
    if (!leptonSelection) continue;   // S2
    s2++;
-   if (nElectron == 1){
-     lepton_is_e |= 1;
-     lepton_pt = Electrons[0]->P4().Pt();
-     lepton_eta = Electrons[0]->P4().Eta();
-     lepton_cl_eta = lepton_eta;
-     lepton_phi = Electrons[0]->P4().Phi();
-     lepton_e = Electrons[0]->P4().E();
-   }
-   else if (nMuon == 1){
-     lepton_is_mu |= 1;
-     lepton_pt = Muons[0]->P4().Pt();
-     lepton_eta = Muons[0]->P4().Eta();
-     lepton_cl_eta = lepton_eta;
-     lepton_phi = Muons[0]->P4().Phi();
-     lepton_e = Muons[0]->P4().E();
-   }
 
    // Jet and b-tag Selections (S3)
    njets = 0;
@@ -796,8 +760,6 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
      met = (MissingET*) branchMissingET->At(0);
      MET_px = met->MET * cos( met->Phi);
      MET_py = met->MET * sin( met->Phi);
-     met_met = met->MET;
-     met_phi = met->Phi;
      //cout << "px " << MET_px <<" py "<< MET_py<<" MET "<<met->MET<<endl;
      nu.SetPxPyPzE( MET_px, MET_py, 0, met->MET );
    }
@@ -913,6 +875,12 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
 
    float mbb = 999;
    float dRbb = 999;
+
+   // Chi-square variables
+   const float MT = 172.5;
+   const float MW = 80.4;
+   const float WT = 1.47;
+   const float WW = 2.085;
 
    // Select two bjets with minimum dR and fill the dnn ntuples
    TLorentzVector RecoAddJets[2];
@@ -1055,6 +1023,41 @@ void ana(const char *inputFile, const char *outputFile, int jcut, int bcut,int n
        for( int a = 0; a < bJets.size(); a++){
          if ( a != b1 && a != b2 ) exJets.push_back(bJets[a]);
        }
+       //cout<<"Jet collection size : "<<exJets.size()<<endl;
+
+       vector<int> idx;
+       vector<Jet *> selJets;
+       for( int i = 0; i < exJets.size() - 3; i++){
+         idx.push_back(0);
+       }
+       for( int i = 0; i < 3; i++){
+         idx.push_back(1);
+       }
+       //cout<<"Index size : "<<idx.size()<<endl;
+       sort(idx.begin(), idx.end());
+       float tmp_chi2 = 99999;
+       do{
+         selJets.clear();
+         for(int i = 0; i < idx.size(); i++){
+           if(idx[i] == 1){
+             selJets.push_back(exJets[i]);
+           }
+         }
+         //cout<<selJets.size()<<endl;
+         float top_mass = (selJets[0]->P4()+selJets[1]->P4()+selJets[2]->P4()).M();
+         for(int j = 0; j < selJets.size(); j++){
+           float w_mass = ( selJets[j%3]->P4() + selJets[(j+1)%3]->P4() ).M();
+           float tmp_chi2_w = pow((MW-w_mass)/WW,2);
+           float tmp_chi2_top = pow((MT-top_mass)/WT,2);
+           if( tmp_chi2_w + tmp_chi2_top < tmp_chi2 ){
+             tmp_chi2 = tmp_chi2_w + tmp_chi2_top;
+             //cout<<"top_mass : "<<top_mass<<" w_mass : "<<w_mass<<" tmp_chi2_w : "<<tmp_chi2_w<<" tmp_chi2_top : "<<tmp_chi2_top<<endl;
+           }
+         }
+       }while(next_permutation(idx.begin(), idx.end()));
+
+       chi2 = tmp_chi2;
+       //cout<<chi2<<endl;
        
        dnn_tree->Fill();
      }
